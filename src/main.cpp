@@ -21,6 +21,7 @@ char password[] = "coglione1";
 
 MD_Parola matrix = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 RTC_DS3231 rtc;
+
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org");
 
@@ -31,7 +32,8 @@ Timezone CE(CET, CEST);
 void setup()
 {
   Serial.begin(9600);
-  if(!matrix.begin(3)) {
+
+  if(!matrix.begin(4)) {
     Serial.printf("Error initializing MAX7219.\n");
     while(true);
   }
@@ -44,32 +46,35 @@ void setup()
   if (rtc.lostPower()) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    Serial.println("\nConnecting");
 
-    while(WiFi.status() != WL_CONNECTED){
-      Serial.print(".");
+    while(WiFi.status() != WL_CONNECTED)
       delay(100);
-    }
+
     timeClient.begin();
     delay(50);
     timeClient.update();
     delay(500);
 
-    if(timeClient.isTimeSet()) {
-      time_t now = CE.toLocal(timeClient.getEpochTime());
-      rtc.adjust(DateTime(now));
-      Serial.print("Time Update.\n");
-    }
+    if(timeClient.isTimeSet())
+      rtc.adjust(timeClient.getEpochTime());
+
+    WiFi.disconnect();
   }
 
   matrix.setIntensity(10);
-  Serial.printf("%02d/%02d/%d\n%02d:%02d:%02d", (rtc.now()).day(), (rtc.now()).month(), (rtc.now()).year(), (rtc.now()).hour(), (rtc.now()).minute(), (rtc.now()).second());
 }
  
 void loop() 
 {
   char hh_mm[] = "00:00";
   char ss[] = "00";
+
+  /*
+    picks up the current time from RTC (which is in DateTime class)
+    converts it to epochtime
+    then to local time and then to DateTime class
+  */
+  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
 
   matrix.setZone(0, 0, 0);
   matrix.setZone(1, 1, 3);
@@ -80,9 +85,8 @@ void loop()
   matrix.displayZoneText(0, ss, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);
   matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
   
-  sprintf(hh_mm, "%02d%c%02d ", (rtc.now()).hour(), (((rtc.now()).second() % 2) ? ':' : ' '), (rtc.now()).minute());
-  sprintf(ss, "%02d", (rtc.now()).second());
-
+  sprintf(hh_mm, "%02d%c%02d ", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
+  sprintf(ss, "%02d", now.second());
   matrix.displayAnimate();
   matrix.displayReset(0);
   matrix.displayReset(1);
