@@ -7,6 +7,8 @@
 #include <WiFi.h>
 #include <NTPClient.h>
 #include <Timezone.h>
+#include <string>
+#include <iostream>
 #include "Font_Data.h"
 
 #define CLK_PIN   12
@@ -23,7 +25,7 @@ MD_Parola matrix = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVIC
 RTC_DS3231 rtc;
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org");
+NTPClient timeClient(ntpUDP, "time.windows.com");
 
 TimeChangeRule CET = {"CET", Last, Sun, Oct, 3, 60};    // Daylight time = UTC + 1 hour
 TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Standard time = UTC + 2 hours
@@ -33,7 +35,7 @@ void setup()
 {
   Serial.begin(9600);
 
-  if(!matrix.begin(4)) {
+  if(!matrix.begin(8)) {
     Serial.printf("Error initializing MAX7219.\n");
     while(true);
   }
@@ -63,11 +65,11 @@ void setup()
 
   matrix.setIntensity(10);
 }
- 
-void loop() 
+
+void loop()
 {
-  char hh_mm[] = "00:00";
-  char ss[] = "00";
+  char hh_mm[6];
+  char ss[3];
 
   /*
     picks up the current time from RTC (which is in DateTime class)
@@ -75,6 +77,9 @@ void loop()
     then to local time and then to DateTime class
   */
   DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
+
+  sprintf(hh_mm, "%02d%c%02d", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
+  sprintf(ss, "%02d", now.second());
 
   matrix.setZone(0, 0, 0);
   matrix.setZone(1, 1, 3);
@@ -84,10 +89,23 @@ void loop()
 
   matrix.displayZoneText(0, ss, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);
   matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-  
-  sprintf(hh_mm, "%02d%c%02d ", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
-  sprintf(ss, "%02d", now.second());
+
   matrix.displayAnimate();
   matrix.displayReset(0);
   matrix.displayReset(1);
 }
+
+/*
+#ifdef ESP32
+  #include <WiFi.h>
+#else
+  #include <ESP8266WiFi.h>
+#endif
+*/
+
+/*
+  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
+  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
+*/
