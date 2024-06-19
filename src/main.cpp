@@ -7,33 +7,20 @@
 #include <WiFi.h>
 #include <NTPClient.h>
 #include <Timezone.h>
-#include <string>
-#include <sstream>
-#include "Font_Data.h"
 
-#define SSID "clock"
-#define PASSWORD "coglione1"
-
-#define CLK_PIN   12
-#define DATA_PIN  11
-#define CS_PIN    10
-
-#define MAX_DEVICES 4
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
+#include <defines.h>
+#include <Font_Data.h>
+#include <Local_Time.h>
 
 MD_Parola matrix = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 RTC_DS3231 rtc;
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "pool.ntp.org");
-
-TimeChangeRule CET = {"CET", Last, Sun, Oct, 3, 60};    // Daylight time = UTC + 1 hour
-TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Standard time = UTC + 2 hours
-Timezone CE(CET, CEST);
+NTPClient timeClient(ntpUDP, INRIM);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   if(!matrix.begin(8)) {
     Serial.printf("Error initializing MAX7219.\n");
@@ -41,28 +28,59 @@ void setup()
   }
 
   if (!rtc.begin()) {
-    Serial.println("Could not find RTC! Check circuit.\n");
+    Serial.printf("Could not find RTC! Check circuit.\n");
     while(true);
   }
 
   if (rtc.lostPower()) {
+    Serial.printf("RTC lost power, trying to set the time.\n");
+
     WiFi.mode(WIFI_STA);
-    WiFi.begin(SSID, PASSWORD);
 
-    while(WiFi.status() != WL_CONNECTED)
-      delay(100);
+    Serial.println("Scan start.\n");
 
-    timeClient.begin();
-    delay(50);
-    timeClient.update();
-    delay(500);
+    int n_net = WiFi.scanNetworks();
+    bool ap_found = false;
+  
+    if (n_net) {
+        for (int i = 0; i < n_net; ++i) {
+          Serial.println(WiFi.SSID(i));
+          if(WiFi.SSID(i) == YOUR_SSID) {
+            ap_found = true;
+            break;
+          }
+        }
+    }
 
-    if(timeClient.isTimeSet())
-      rtc.adjust(timeClient.getEpochTime());
+    Serial.println("AP found.\n");
 
-    WiFi.disconnect();
+    if(ap_found) {
+      WiFi.begin(YOUR_SSID, YOUR_PASSWORD);
+
+      Serial.printf("Connecting to WiFi.\n");
+
+      while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
+        delay(100);
+
+      Serial.printf("Connected to %s.\n", YOUR_SSID);
+
+      timeClient.begin();
+      delay(50);
+      timeClient.update();
+      delay(500);
+
+      if(timeClient.isTimeSet())
+        rtc.adjust(timeClient.getEpochTime());
+
+      WiFi.disconnect();
+
+      Serial.printf("RTC adjusted with NTP time.\n Disconnecting from WiFi.\n");
+    }
+    else {
+      Serial.printf("WiFi AP not found. Cannot Sync time.\n");
+      rtc.adjust(DateTime("Jan 1 2000", "00:00:00"));
+    }
   }
-
   matrix.setIntensity(10);
 }
 
@@ -76,7 +94,7 @@ void loop()
    * 
    * @param DateTime
    */
-  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
+  DateTime now = DateTime(current_timezone->toLocal((rtc.now()).unixtime()));
 
   char hh_mm[6], ss[3];
 
@@ -86,8 +104,8 @@ void loop()
   matrix.setZone(0, 0, 0);
   matrix.setZone(1, 1, 3);
 
-  matrix.setFont(0, small_num);
-  matrix.setFont(1, pixel_font);
+  matrix.setFont(0, font[0]);
+  matrix.setFont(1, font[1]);
 
   if(matrix.displayAnimate()) {
     matrix.displayZoneText(0, ss, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);

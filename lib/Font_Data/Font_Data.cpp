@@ -1,8 +1,6 @@
-#pragma once
-
 #include <MD_MAX72xx.h>
 
-MD_MAX72XX::fontType_t small_num[] PROGMEM = 
+MD_MAX72XX::fontType_t small_num[] PROGMEM =
 {
   0,    // 0
   0,    // 1
@@ -262,7 +260,7 @@ MD_MAX72XX::fontType_t small_num[] PROGMEM =
   0,    // 255
 };
 
-MD_MAX72XX::fontType_t pixel_font[] PROGMEM = 
+MD_MAX72XX::fontType_t pixel_font[] PROGMEM =
 {
 	0, 	// 0      
 	0, 	// 1      
