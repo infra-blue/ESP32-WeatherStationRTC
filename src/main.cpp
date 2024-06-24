@@ -25,8 +25,8 @@
 #define BH1750_ADDR 0x23
 #endif
 
-#ifndef DS3231_ADDRESS
-#define DS3231_ADDRESS 0x68
+#ifndef DS3231_ADDR
+#define DS3231_ADDR 0x68
 #endif
 
 #define CLK_PIN   18
@@ -36,6 +36,12 @@
 #define MAX_DEVICES 8
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 
+#define MCNTP "time.windows.com"
+#define POOLNTP "pool.ntp.org"
+#define POOLNTP1 "0.it.pool.ntp.org"
+#define INRIM "time.inrim.it"
+#define INRIM1 "ntp1.inrim.it"
+#define INRIM2 "ntp2.inrim.it"
 
 MD_Parola matrix = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 RTC_DS3231 rtc;
@@ -88,10 +94,12 @@ void setup()
 
     int n_net = WiFi.scanNetworks();
     bool ap_found = false;
+    char ssid[256];
 
     if (n_net)
        for (int i = 0; i < n_net; ++i)
-          if(WiFi.SSID(i) == YOUR_SSID) {
+          if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
+            strcpy(ssid, WiFi.SSID(i).c_str());
             ap_found = true;
             break;
           }
@@ -99,14 +107,14 @@ void setup()
     if(ap_found) {
       Serial.printf("AP found.\n");
 
-      WiFi.begin(YOUR_SSID, YOUR_PASSWORD);
+      WiFi.begin(ssid);
 
       Serial.printf("Connecting to WiFi.\n");
 
-      while(WiFi.status() != WL_CONNECTED && WiFi.status())
+      while(WiFi.status() != WL_CONNECTED)
         delay(100);
 
-      Serial.printf("Connected to %s.\n", YOUR_SSID);
+      Serial.printf("Connected to %s.\n", ssid);
 
       timeClient.begin();
       delay(50);
