@@ -11,10 +11,9 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <BH1750.h>
-
+#include <Bounce2.h>
 #include <cmath>
 
-#include <defines.h>
 #include <Font_Data.h>
 
 #ifndef BME280_ADDR
@@ -29,6 +28,8 @@
 #define DS3231_ADDR 0x68
 #endif
 
+#define BUTTON_PIN 0
+
 #define CLK_PIN   18
 #define DATA_PIN  23
 #define CS_PIN    5
@@ -36,6 +37,7 @@
 #define MAX_DEVICES 8
 #define HARDWARE_TYPE MD_MAX72XX::FC16_HW
 
+//NTP servers
 #define MCNTP "time.windows.com"
 #define POOLNTP "pool.ntp.org"
 #define POOLNTP1 "0.it.pool.ntp.org"
@@ -46,7 +48,9 @@
 MD_Parola matrix = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 RTC_DS3231 rtc;
 Adafruit_BME280 bme;
-BH1750 lux;
+BH1750 light_sensor;
+
+Bounce debouncer = Bounce();
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, INRIM);
@@ -58,40 +62,54 @@ Timezone CE(CET, CEST);
 
 Timezone current_timezone = CE;
 
-char days[7][4] = {"DOM", "LUN", "MAR", "MER", "GIO", "VEN", "SAB"};
-char months[12][4] = {"GEN", "FEB", "MAR", "APR", "MAG", "GIU", "LUG", "AGO", "SET", "OTT", "NOV", "DIC"};
+//days and months
+char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+char months[12][4] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+
+//display selector and screens
+uint8_t displaySelector = 0;
+enum screen{
+  CLOCK_TEMP,
+  DATE,
+  HUMIDITY_PRESSURE
+};
 
 void setup()
 {
   Serial.begin(115200);
 
-  if(!matrix.begin(8)) {
-    Serial.printf("Error initializing MAX7219.\n");
+  //initialize button
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  debouncer.attach(BUTTON_PIN);
+  debouncer.interval(50);
+
+  if(!matrix.begin(3)) {
+    Serial.printf("Could not find MAX7219! Check wiring!\n");
     while(true);
   }
 
   if (!rtc.begin(&Wire)) {
-    Serial.printf("Could not find RTC! Check circuit.\n");
+    Serial.printf("Could not find DS3231 RTC! Check wiring!\n");
     while(true);
   }
 
   if (!bme.begin(BME280_ADDR, &Wire)) {
-    Serial.println("Could not find a valid BME280 sensor, check wiring!");
+    Serial.println("Could not find BME280 sensor! Check wiring!\n");
     while(true);
   }
 
-  if(!lux.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, BH1750_ADDR, &Wire)) {
-    Serial.println("Could not find a valid BH1750 sensor, check wiring!");
+  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, BH1750_ADDR, &Wire)) {
+    Serial.println("Could not find BH1750 sensor! Check wiring!\n");
     while(true);
   }
 
   if (rtc.lostPower()) {
+    // if the RTC lost power, set the time trying to sync with NTP server
     Serial.printf("RTC lost power, trying to set the time.\n");
 
     WiFi.mode(WIFI_STA);
 
-    Serial.printf("Scan start.\n");
-
+    //scan for open WiFi AP
     int n_net = WiFi.scanNetworks();
     bool ap_found = false;
     char ssid[256];
@@ -105,11 +123,8 @@ void setup()
           }
 
     if(ap_found) {
-      Serial.printf("AP found.\n");
-
       WiFi.begin(ssid);
-
-      Serial.printf("Connecting to WiFi.\n");
+      Serial.printf("Connecting to %s.\n", ssid);
 
       while(WiFi.status() != WL_CONNECTED)
         delay(100);
@@ -127,28 +142,26 @@ void setup()
       }
       else {
         Serial.printf("NTP server error. Time not set.\n");
-        rtc.adjust(DateTime("Jan 1 2000", "00:00:00"));
+        rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
       }
 
       WiFi.disconnect();
     }
     else {
       Serial.printf("WiFi AP not found. Cannot Sync time.\n");
-      rtc.adjust(DateTime("Jan 1 2000", "00:00:00"));
+      rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
     }
   }
-
-  matrix.setIntensity(10);
 }
 
-void print_screen_1() {
+void print_time_temp() {
   /**
   * @brief
   *  picks up the current time from RTC (which is in DateTime class)
   *  converts it to epochtime
-  *  then to local time and then to DateTime class
+  *  then to local time
   *  then prints the time on the matrix display
-  *  formatted as HH:MM:SS
+  *  formatted as HH:MM SS
   */
 
   char hh_mm[6];
@@ -161,19 +174,24 @@ void print_screen_1() {
   sprintf(ss, "%02d", now.second());
   sprintf(temp, "%2.1f C°", bme.readTemperature());
 
+  // upper screen for HH:MM and SS
   matrix.setZone(0, 7, 7);
   matrix.setZone(1, 4, 6);
+
+  // lower screen for temperature
   matrix.setZone(2, 0, 3);
 
+  // flip the upper screen
   matrix.setZoneEffect(0, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
   matrix.setZoneEffect(0, 1, PA_FLIP_LR);
+  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
   matrix.setZoneEffect(1, 1, PA_FLIP_LR);
 
-  matrix.setFont(0, small_num);
+  matrix.setFont(0, small_font);
   matrix.setFont(1, pixel_font);
   matrix.setFont(2, pixel_font);
 
+  //print time and temperature
   if(matrix.displayAnimate()) {
     matrix.displayZoneText(0, ss, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
     matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
@@ -185,78 +203,117 @@ void print_screen_1() {
   }
 }
 
-void print_screen_2() {
+void print_date() {
   /**
-   * @brief
-   */
-
+  * @brief
+  * picks up the current time from RTC (which is in DateTime class)
+  * converts it to epochtime
+  * then to local time
+  * then prints the date on the matrix display
+  * formatted as DDD DD MMM YYYY
+  */
   char ddd_dd[7];
   char mmm_yyyy[9];
 
   DateTime now = DateTime(current_timezone.toLocal((rtc.now()).unixtime()));
 
-  sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek()], now.day());
+  sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek() + 1], now.day());
   sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
 
-  matrix.setZone(3, 4, 7);
-  matrix.setZone(4, 0, 3);
+  // upper screen for DDD DD
+  matrix.setZone(0, 4, 7);
+  // lower screen for MMM YYYY
+  matrix.setZone(1, 0, 3);
 
-  matrix.setZoneEffect(3, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(3, 1, PA_FLIP_LR);
+  // flip the back the lower screen
+  matrix.setZoneEffect(1, 0, PA_FLIP_UD);
+  matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 
-  matrix.setFont(3, small_num);
-  matrix.setFont(4, small_num);
+  matrix.setFont(0, small_font);
+  matrix.setFont(1, small_font);
 
+  //print date
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(3, ddd_dd, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(4, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(0, ddd_dd, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(1, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
 
-    matrix.displayReset(3);
-    matrix.displayReset(4);
+    matrix.displayReset(0);
+    matrix.displayReset(1);
   }
 }
 
-void print_screen_3() {
+void print_hum_pres() {
   /**
-   * @brief
-   */
+  * @brief
+  * picks up the current humidity and pressure from BME280 sensor
+  * then prints the humidity and pressure on the matrix display
+  * formatted as HHH.H% and PPPP.P
+  */
 
-  char hum[8];
-  char pres[8];
+  char hum[9];
+  char pres[9];
 
-  sprintf(hum, "H%3.1f%%", bme.readHumidity());
-  sprintf(pres, "P%5.1f", bme.readPressure() / 100.0F);
+  sprintf(hum, "H %3.1f%%", bme.readHumidity());
+  sprintf(pres, "P%5.1f", bme.readPressure() / 100.0f);
 
-  matrix.setZone(5, 4, 7);
-  matrix.setZone(6, 0, 3);
+  // upper screen for humidity
+  matrix.setZone(0, 4, 7);
+  // lower screen for pressure
+  matrix.setZone(1, 0, 3);
 
-  matrix.setZoneEffect(5, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(5, 1, PA_FLIP_LR);
+  // flip back the lower screen
+  matrix.setZoneEffect(1, 0, PA_FLIP_UD);
+  matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 
-  matrix.setFont(5, pixel_font);
-  matrix.setFont(6, pixel_font);
+  matrix.setFont(0, pixel_font);
+  matrix.setFont(1, pixel_font);
 
+  //print humidity and pressure
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(5, hum, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(6, pres, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(0, hum, PA_RIGHT, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(1, pres, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);
 
-    matrix.displayReset(5);
-    matrix.displayReset(6);
+    matrix.displayReset(0);
+    matrix.displayReset(1);
   }
 }
 
 void set_intensity() {
   /**
-   * @brief
-   * 
-   */
-  if(lux.measurementReady())
-    matrix.setIntensity(int(round(lux.readLightLevel())) % 16);
+  * @brief
+  * picks up the current light level from BH1750 sensor
+  * then sets the intensity of the matrix display
+  * based on the light level
+  * mapped from to 0 to 15 (max level limited to 300 for more sensitivity)
+  */
+  if(light_sensor.measurementReady())
+    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
 }
 
 void loop()
 {
-  print_screen_1();
+  /**
+  * @brief
+  * updates the debouncer
+  * if the button is pressed, changes the displaySelector
+  * then based on the displaySelector, calls the respective function
+  * to display the time, date or humidity and pressure
+  * then sets the intensity of the matrix display
+  */
+  debouncer.update();
+  if (debouncer.fell())
+      ++displaySelector %= 3;
+
+  switch(displaySelector) {
+    case CLOCK_TEMP:
+      print_time_temp();
+      break;
+    case DATE:
+      print_date();
+      break;
+    case HUMIDITY_PRESSURE:
+      print_hum_pres();
+      break;
+  }
   set_intensity();
-  delay(50);
 }
