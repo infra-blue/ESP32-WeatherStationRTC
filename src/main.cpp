@@ -225,7 +225,7 @@ void print_date() {
   // lower screen for MMM YYYY
   matrix.setZone(1, 0, 3);
 
-  // flip the back the lower screen
+  // flip back the lower screen
   matrix.setZoneEffect(1, 0, PA_FLIP_UD);
   matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 
