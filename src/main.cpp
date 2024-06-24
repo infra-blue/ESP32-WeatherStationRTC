@@ -12,7 +12,6 @@
 #include <Adafruit_BME280.h>
 #include <BH1750.h>
 #include <Bounce2.h>
-#include <cmath>
 
 #include <Font_Data.h>
 
