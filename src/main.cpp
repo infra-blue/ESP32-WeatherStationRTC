@@ -289,10 +289,10 @@ void set_intensity() {
   * picks up the current light level from BH1750 sensor
   * then sets the intensity of the matrix display
   * based on the light level
-  * mapped from to 1 to 15 (max level limited to 200 for more sensitivity)
+  * mapped from to 1 to 15 (max level limited to 300 for more sensitivity)
   */
   if(light_sensor.measurementReady())
-    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 200), 0, 300, 1, 15));
+    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 1, 15));
 }
 
 void loop()
