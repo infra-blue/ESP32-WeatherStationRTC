@@ -49,7 +49,7 @@ RTC_DS3231 rtc;
 Adafruit_BME280 bme;
 BH1750 light_sensor;
 
-Bounce debouncer = Bounce();
+Bounce2::Button screen_button = Bounce2::Button();
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, INRIM);
@@ -58,8 +58,6 @@ NTPClient timeClient(ntpUDP, INRIM);
 TimeChangeRule CET = {"CET", Last, Sun, Oct, 3, 60};    // Daylight time = UTC + 1 hour
 TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Standard time = UTC + 2 hours
 Timezone CE(CET, CEST);
-
-Timezone current_timezone = CE;
 
 //days and months
 char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
@@ -78,11 +76,11 @@ void setup()
   Serial.begin(115200);
 
   //initialize button
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-  debouncer.attach(BUTTON_PIN);
-  debouncer.interval(50);
+  screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
+  screen_button.interval(5);
+  screen_button.setPressedState(LOW);
 
-  if(!matrix.begin(3)) {
+  if(!matrix.begin(8)) {
     Serial.printf("Could not find MAX7219! Check wiring!\n");
     while(true);
   }
@@ -109,26 +107,34 @@ void setup()
     WiFi.mode(WIFI_STA);
 
     //scan for open WiFi AP
-    int n_net = WiFi.scanNetworks();
-    bool ap_found = false;
+    uint8_t n_net = WiFi.scanNetworks();
+    bool open_ap_found = false;
     char ssid[256];
 
-    if (n_net)
-       for (int i = 0; i < n_net; ++i)
-          if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
-            strcpy(ssid, WiFi.SSID(i).c_str());
-            ap_found = true;
-            break;
-          }
+    if (n_net) {
+      Serial.println("Network found!\n");
+      for (uint8_t i = 0; i < n_net; ++i) {
+        if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
+          strcpy(ssid, WiFi.SSID(i).c_str());
+          open_ap_found = true;
+          break;
+        }
+      }
+    }
+    else {
+      Serial.println("No network found.\n");
+    }
 
-    if(ap_found) {
+    if(open_ap_found) {
       WiFi.begin(ssid);
-      Serial.printf("Connecting to %s.\n", ssid);
+      Serial.printf("Connecting to %s ", ssid);
 
-      while(WiFi.status() != WL_CONNECTED)
+      while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED) {
         delay(100);
+        Serial.println(".");
+      }
 
-      Serial.printf("Connected to %s.\n", ssid);
+      Serial.printf("\nConnected to %s.\n", ssid);
 
       timeClient.begin();
       delay(50);
@@ -167,7 +173,7 @@ void print_time_temp() {
   char ss[3];
   char temp[10];
 
-  DateTime now = DateTime(current_timezone.toLocal((rtc.now()).unixtime()));
+  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
 
   sprintf(hh_mm, "%02d%c%02d", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
   sprintf(ss, "%02d", now.second());
@@ -214,7 +220,7 @@ void print_date() {
   char ddd_dd[7];
   char mmm_yyyy[9];
 
-  DateTime now = DateTime(current_timezone.toLocal((rtc.now()).unixtime()));
+  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
 
   sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek() + 1], now.day());
   sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
@@ -283,24 +289,23 @@ void set_intensity() {
   * picks up the current light level from BH1750 sensor
   * then sets the intensity of the matrix display
   * based on the light level
-  * mapped from to 0 to 15 (max level limited to 300 for more sensitivity)
+  * mapped from to 1 to 15 (max level limited to 200 for more sensitivity)
   */
   if(light_sensor.measurementReady())
-    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
+    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 200), 0, 300, 1, 15));
 }
 
 void loop()
 {
   /**
   * @brief
-  * updates the debouncer
+  * updates the screen_button
   * if the button is pressed, changes the displaySelector
-  * then based on the displaySelector, calls the respective function
   * to display the time, date or humidity and pressure
   * then sets the intensity of the matrix display
   */
-  debouncer.update();
-  if (debouncer.fell())
+  screen_button.update();
+  if (screen_button.fell())
       ++displaySelector %= 3;
 
   switch(displaySelector) {
@@ -314,5 +319,6 @@ void loop()
       print_hum_pres();
       break;
   }
+
   set_intensity();
 }
