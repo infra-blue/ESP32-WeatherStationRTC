@@ -102,7 +102,13 @@ void setup()
 
   if (rtc.lostPower()) {
     // if the RTC lost power, set the time trying to sync with NTP server
-    Serial.printf("RTC lost power, trying to set the time.\n");
+    Serial.printf("RTC lost power. Press the button for trying to set the time.\n");
+
+    //wait for button press
+    while(!screen_button.fell())
+      screen_button.update();
+
+    Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
 
     WiFi.mode(WIFI_STA);
 
@@ -129,10 +135,8 @@ void setup()
       WiFi.begin(ssid);
       Serial.printf("Connecting to %s ", ssid);
 
-      while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED) {
+      while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
         delay(100);
-        Serial.println(".");
-      }
 
       Serial.printf("\nConnected to %s.\n", ssid);
 
@@ -143,7 +147,7 @@ void setup()
 
       if(timeClient.isTimeSet()) {
         rtc.adjust(timeClient.getEpochTime());
-        Serial.printf("RTC adjusted with NTP time.\n Disconnecting from WiFi.\n");
+        Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", ssid);
       }
       else {
         Serial.printf("NTP server error. Time not set.\n");
@@ -289,10 +293,10 @@ void set_intensity() {
   * picks up the current light level from BH1750 sensor
   * then sets the intensity of the matrix display
   * based on the light level
-  * mapped from to 1 to 15 (max level limited to 300 for more sensitivity)
+  * mapped from to 0 to 15 (max level limited to 300 for more sensitivity)
   */
   if(light_sensor.measurementReady())
-    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 1, 15));
+    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
 }
 
 void loop()
