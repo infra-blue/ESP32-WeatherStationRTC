@@ -181,7 +181,7 @@ void print_time_temp() {
 
   sprintf(hh_mm, "%02d%c%02d", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
   sprintf(ss, "%02d", now.second());
-  sprintf(temp, "%2.1f C°", bme.readTemperature());
+  sprintf(temp, "%3.1f° C", bme.readTemperature());
 
   // upper screen for HH:MM and SS
   matrix.setZone(0, 7, 7);
