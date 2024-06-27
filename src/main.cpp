@@ -210,6 +210,10 @@ void print_time_temp() {
     matrix.displayReset(1);
     matrix.displayReset(2);
   }
+
+  // flip back the zone 1 that is used by the other screens
+  matrix.setZoneEffect(1, 0, PA_FLIP_UD);
+  matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 }
 
 void print_date() {
@@ -233,10 +237,6 @@ void print_date() {
   matrix.setZone(0, 4, 7);
   // lower screen for MMM YYYY
   matrix.setZone(1, 0, 3);
-
-  // flip back the lower screen
-  matrix.setZoneEffect(1, 0, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 
   matrix.setFont(0, small_font);
   matrix.setFont(1, small_font);
@@ -269,10 +269,6 @@ void print_hum_pres() {
   matrix.setZone(0, 4, 7);
   // lower screen for pressure
   matrix.setZone(1, 0, 3);
-
-  // flip back the lower screen
-  matrix.setZoneEffect(1, 0, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 
   matrix.setFont(0, pixel_font);
   matrix.setFont(1, pixel_font);
