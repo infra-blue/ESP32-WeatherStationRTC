@@ -230,7 +230,7 @@ void print_date() {
 
   DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
 
-  sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek() + 1], now.day());
+  sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek()], now.day());
   sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
 
   // upper screen for DDD DD
