@@ -80,7 +80,7 @@ void setup()
   screen_button.interval(5);
   screen_button.setPressedState(LOW);
 
-  if(!matrix.begin(8)) {
+  if(!matrix.begin(7)) {
     Serial.printf("Could not find MAX7219! Check wiring!\n");
     while(true);
   }
@@ -161,6 +161,49 @@ void setup()
       rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
     }
   }
+
+  //setting up zones of the matrix display
+
+  // upper screen for HH:MM and SS
+  matrix.setZone(0, 7, 7);
+  matrix.setZone(1, 4, 6);
+
+  // lower screen for temperature
+  matrix.setZone(2, 0, 3);
+
+  // flip the upper screen
+  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
+  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
+
+  matrix.setFont(0, small_font);
+  matrix.setFont(1, pixel_font);
+  matrix.setFont(2, pixel_font);
+
+  // upper screen for DDD DD
+  matrix.setZone(3, 4, 7);
+  // lower screen for MMM YYYY
+  matrix.setZone(4, 0, 3);
+
+  // flip the upper screen
+  matrix.setZoneEffect(3, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(3, 1, PA_FLIP_LR);
+
+  matrix.setFont(3, small_font);
+  matrix.setFont(4, small_font);
+
+  // upper screen for humidity
+  matrix.setZone(5, 4, 7);
+  // lower screen for pressure
+  matrix.setZone(6, 0, 3);
+
+  // flip the upper screen
+  matrix.setZoneEffect(5, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(5, 1, PA_FLIP_LR);
+
+  matrix.setFont(5, pixel_font);
+  matrix.setFont(6, pixel_font);
 }
 
 void print_time_temp() {
@@ -183,24 +226,8 @@ void print_time_temp() {
   sprintf(ss, "%02d", now.second());
   sprintf(temp, "%3.1f° C", bme.readTemperature());
 
-  // upper screen for HH:MM and SS
-  matrix.setZone(0, 7, 7);
-  matrix.setZone(1, 4, 6);
-
-  // lower screen for temperature
-  matrix.setZone(2, 0, 3);
-
-  // flip the upper screen
-  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
-  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
-
-  matrix.setFont(0, small_font);
-  matrix.setFont(1, pixel_font);
-  matrix.setFont(2, pixel_font);
-
   //print time and temperature
+  matrix.synchZoneStart();
   if(matrix.displayAnimate()) {
     matrix.displayZoneText(0, ss, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
     matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
@@ -210,10 +237,6 @@ void print_time_temp() {
     matrix.displayReset(1);
     matrix.displayReset(2);
   }
-
-  // flip back the zone 1 that is used by the other screens
-  matrix.setZoneEffect(1, 0, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 0, PA_FLIP_LR);
 }
 
 void print_date() {
@@ -233,21 +256,14 @@ void print_date() {
   sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek()], now.day());
   sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
 
-  // upper screen for DDD DD
-  matrix.setZone(0, 4, 7);
-  // lower screen for MMM YYYY
-  matrix.setZone(1, 0, 3);
-
-  matrix.setFont(0, small_font);
-  matrix.setFont(1, small_font);
-
   //print date
+  matrix.synchZoneStart();
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(0, ddd_dd, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(1, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(3, ddd_dd, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(4, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
 
-    matrix.displayReset(0);
-    matrix.displayReset(1);
+    matrix.displayReset(3);
+    matrix.displayReset(4);
   }
 }
 
@@ -265,21 +281,14 @@ void print_hum_pres() {
   sprintf(hum, "H %3.1f%%", bme.readHumidity());
   sprintf(pres, "P%5.1f", bme.readPressure() / 100.0f);
 
-  // upper screen for humidity
-  matrix.setZone(0, 4, 7);
-  // lower screen for pressure
-  matrix.setZone(1, 0, 3);
-
-  matrix.setFont(0, pixel_font);
-  matrix.setFont(1, pixel_font);
-
   //print humidity and pressure
+  matrix.synchZoneStart();
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(0, hum, PA_RIGHT, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(1, pres, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(5, hum, PA_RIGHT, 75, 0, PA_PRINT, PA_NO_EFFECT);
+    matrix.displayZoneText(6, pres, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);
 
-    matrix.displayReset(0);
-    matrix.displayReset(1);
+    matrix.displayReset(5);
+    matrix.displayReset(6);
   }
 }
 
