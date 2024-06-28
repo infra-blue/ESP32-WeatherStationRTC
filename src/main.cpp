@@ -80,7 +80,7 @@ void setup()
   screen_button.interval(5);
   screen_button.setPressedState(LOW);
 
-  if(!matrix.begin(7)) {
+  if(!matrix.begin(9)) {
     Serial.printf("Could not find MAX7219! Check wiring!\n");
     while(true);
   }
@@ -104,9 +104,23 @@ void setup()
     // if the RTC lost power, set the time trying to sync with NTP server
     Serial.printf("RTC lost power. Press the button for trying to set the time.\n");
 
+    matrix.setZone(7, 4, 7);
+    matrix.setZone(8, 0, 3);
+    matrix.setFont(7, small_font);
+    matrix.setFont(8, small_font);
+    matrix.setZoneEffect(7, 1, PA_FLIP_UD);
+    matrix.setZoneEffect(7, 1, PA_FLIP_LR);
+    matrix.displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
+    matrix.displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
+
     //wait for button press
-    while(!screen_button.fell())
+    while(!screen_button.fell()) {
       screen_button.update();
+      matrix.synchZoneStart();
+      if(matrix.displayAnimate()){
+        matrix.displayReset();
+      }
+    }
 
     Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
 
@@ -204,6 +218,8 @@ void setup()
 
   matrix.setFont(5, pixel_font);
   matrix.setFont(6, pixel_font);
+
+  matrix.displayClear();
 }
 
 void print_time_temp() {
@@ -229,13 +245,9 @@ void print_time_temp() {
   //print time and temperature
   matrix.synchZoneStart();
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(0, ss, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(2, temp, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-
-    matrix.displayReset(0);
-    matrix.displayReset(1);
-    matrix.displayReset(2);
+    matrix.displayZoneText(0, ss, PA_CENTER, 75, 0, PA_PRINT);
+    matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT);
+    matrix.displayZoneText(2, temp, PA_CENTER, 75, 0, PA_PRINT);
   }
 }
 
@@ -259,11 +271,8 @@ void print_date() {
   //print date
   matrix.synchZoneStart();
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(3, ddd_dd, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(4, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT, PA_NO_EFFECT);
-
-    matrix.displayReset(3);
-    matrix.displayReset(4);
+    matrix.displayZoneText(3, ddd_dd, PA_CENTER, 75, 0, PA_PRINT);
+    matrix.displayZoneText(4, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT);
   }
 }
 
@@ -284,11 +293,8 @@ void print_hum_pres() {
   //print humidity and pressure
   matrix.synchZoneStart();
   if(matrix.displayAnimate()) {
-    matrix.displayZoneText(5, hum, PA_RIGHT, 75, 0, PA_PRINT, PA_NO_EFFECT);
-    matrix.displayZoneText(6, pres, PA_LEFT, 75, 0, PA_PRINT, PA_NO_EFFECT);
-
-    matrix.displayReset(5);
-    matrix.displayReset(6);
+    matrix.displayZoneText(5, hum, PA_RIGHT, 75, 0, PA_PRINT);
+    matrix.displayZoneText(6, pres, PA_LEFT, 75, 0, PA_PRINT);
   }
 }
 
