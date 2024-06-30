@@ -323,6 +323,15 @@ void loop()
   if (screen_button.fell())
       ++displaySelector %= 3;
 
+  if(screen_button.isPressed() && screen_button.currentDuration() > 1000) {
+    matrix.displayShutdown(true);
+
+    while(!screen_button.fell())
+      screen_button.update();
+  }
+
+  matrix.displayShutdown(false);
+
   switch(displaySelector) {
     case CLOCK_TEMP:
       print_time_temp();
