@@ -340,9 +340,12 @@ void loop()
 
     while(!screen_button.pressed())
       screen_button.update();
-    matrix.displayShutdown(false);
+
     while(!screen_button.released())
       screen_button.update();
+
+    matrix.displayShutdown(false);
   }
+
   set_intensity();
 }
