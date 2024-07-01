@@ -69,6 +69,7 @@ This project is an ESP32-based weather station coded with the arduino framework 
    - Connect your board to your computer.
    - Update the pin definitions and the NTP servers if needed.
    - Change the I2C addresses if needed.
+   - Change the timezone if needed.
    - Compile and upload the code to your ESP32 board.
 
 ## First boot
