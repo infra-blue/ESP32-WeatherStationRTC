@@ -224,7 +224,7 @@ void setup()
 
 void print_time_temp() {
   /**
-  * @brief
+  * @brief TIME AND TEMPERATURE
   *  picks up the current time from RTC (which is in DateTime class)
   *  converts it to epochtime
   *  then to local time
@@ -253,7 +253,7 @@ void print_time_temp() {
 
 void print_date() {
   /**
-  * @brief
+  * @brief DATE
   * picks up the current time from RTC (which is in DateTime class)
   * converts it to epochtime
   * then to local time
@@ -278,7 +278,7 @@ void print_date() {
 
 void print_hum_pres() {
   /**
-  * @brief
+  * @brief HUMIDITY AND PRESSURE
   * picks up the current humidity and pressure from BME280 sensor
   * then prints the humidity and pressure on the matrix display
   * formatted as HHH.H% and PPPP.P
@@ -300,7 +300,7 @@ void print_hum_pres() {
 
 void set_intensity() {
   /**
-  * @brief
+  * @brief AUTO SET INTENSITY
   * picks up the current light level from BH1750 sensor
   * then sets the intensity of the matrix display
   * based on the light level
@@ -313,11 +313,15 @@ void set_intensity() {
 void loop()
 {
   /**
-  * @brief
+  * @brief MAIN LOOP
   * updates the screen_button
   * if the button is pressed, changes the displaySelector
   * to display the time, date or humidity and pressure
   * then sets the intensity of the matrix display
+  * 
+  * if the button is pressed for more than 500ms
+  * the display is turned off
+  * and turned on again when the button is pressed again
   */
   screen_button.update();
   if (screen_button.released())
