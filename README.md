@@ -66,7 +66,7 @@ This project is an ESP32-based weather station coded with the arduino framework 
 
 **Software Setup:**
    - Install the PlatformIO IDE (or the VSCode extension).
-   - Connect the your board to you computer.
+   - Connect your board to you computer.
    - Update the pin definitions and the NTP servers if needed.
    - Change the I2C addresses if needed.
    - Compile and upload the code to your ESP32 board.
