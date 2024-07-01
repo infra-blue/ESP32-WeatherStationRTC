@@ -320,17 +320,8 @@ void loop()
   * then sets the intensity of the matrix display
   */
   screen_button.update();
-  if (screen_button.fell())
-      ++displaySelector %= 3;
-
-  if(screen_button.isPressed() && screen_button.currentDuration() > 1000) {
-    matrix.displayShutdown(true);
-
-    while(!screen_button.fell())
-      screen_button.update();
-  }
-
-  matrix.displayShutdown(false);
+  if (screen_button.released())
+    ++displaySelector %= 3;
 
   switch(displaySelector) {
     case CLOCK_TEMP:
@@ -344,5 +335,14 @@ void loop()
       break;
   }
 
+  if(screen_button.isPressed() && screen_button.currentDuration() > 500) {
+    matrix.displayShutdown(true);
+
+    while(!screen_button.pressed())
+      screen_button.update();
+    matrix.displayShutdown(false);
+    while(!screen_button.released())
+      screen_button.update();
+  }
   set_intensity();
 }
