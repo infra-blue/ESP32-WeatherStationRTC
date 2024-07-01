@@ -36,9 +36,7 @@ This project is an ESP32-based weather station coded with the arduino framework 
 ## Setup
 
 **Hardware Setup:**
-   - The board is an ESP32-DevKitC V4
-
-#### For the pushbutton:
+   - My board is an ESP32-DevKitC V4
 
 | PushButton | ESP32-DevKitC V4 |
 | ----------- | ----------- |
