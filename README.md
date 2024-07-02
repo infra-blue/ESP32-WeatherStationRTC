@@ -76,7 +76,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 
 ## First boot
 At the first boot the display shows "POWER LOST" and if you push the button it tries to connect to the first open AP it finds to sync the RTC with an NTP server.
-### So:
+**So:**
 - Set up an open AP (mobile hotspot is ok)
 - Press the push button on the clock
 - Wait for it to connect to the server
