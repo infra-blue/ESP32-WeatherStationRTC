@@ -112,15 +112,12 @@ void setup()
     matrix.setZoneEffect(7, 1, PA_FLIP_LR);
     matrix.displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
     matrix.displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
+    matrix.synchZoneStart();
+    matrix.displayAnimate();
 
     //wait for button press
-    while(!screen_button.fell()) {
+    while(!screen_button.pressed())
       screen_button.update();
-      matrix.synchZoneStart();
-      if(matrix.displayAnimate()){
-        matrix.displayReset();
-      }
-    }
 
     Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
 
