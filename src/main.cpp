@@ -285,7 +285,10 @@ void print_hum_pres() {
   char pres[9];
 
   sprintf(hum, "H %3.1f%%", bme.readHumidity());
-  sprintf(pres, "P%5.1f", bme.readPressure() / 100.0f);
+  if((bme.readPressure() / 100.0) < 1000.0)
+    sprintf(pres, "P %4.1f", bme.readPressure() / 100.0);
+  else
+    sprintf(pres, "P%5.1f", bme.readPressure() / 100.0);
 
   //print humidity and pressure
   matrix.synchZoneStart();
