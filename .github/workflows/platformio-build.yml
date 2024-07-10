@@ -14,8 +14,6 @@ jobs:
         uses: karniv00l/platformio-run-action@v1
         with:
           environments: "esp32dev"
-          targets: "./src/main.cpp"
-          project-dir: "./ESP32-WeatherStationRTC"
           project-conf: "./platformio.ini"
           jobs: 6
           silent: false
