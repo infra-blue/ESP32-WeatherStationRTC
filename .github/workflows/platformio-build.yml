@@ -1,0 +1,23 @@
+name: PlatformIO
+
+on: 
+    - pull_request
+    - push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: PlatformIO Run
+        uses: karniv00l/platformio-run-action@v1
+        with:
+          environments: "esp32dev"
+          targets: "esp32dev"
+          project-dir: "./src/main.cpp"
+          project-conf: "./platformio.ini"
+          jobs: 6
+          silent: false
+          verbose: true
+          disable-auto-clean: false
