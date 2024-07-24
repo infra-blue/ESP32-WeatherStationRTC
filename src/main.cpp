@@ -284,7 +284,11 @@ void print_hum_pres() {
   char hum[9];
   char pres[9];
 
-  sprintf(hum, "H %3.1f%%", bme.readHumidity());
+  if(bme.readHumidity() < 100.0)
+    sprintf(hum, "H %3.1f%%", bme.readHumidity());
+  else
+    sprintf(hum, "H %3.0f%%", bme.readHumidity());
+
   if((bme.readPressure() / 100.0) < 1000.0)
     sprintf(pres, "P %4.1f", bme.readPressure() / 100.0);
   else
