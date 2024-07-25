@@ -139,9 +139,6 @@ void beepSound() {
     tone(BUZZER_PIN, beep[thisNote], noteDuration);
     noTone(BUZZER_PIN);
   }
-
-  sound = false;
-  sound_interval = millis();
 }
 
 void print_time_temp() {
@@ -179,8 +176,11 @@ void print_time_temp() {
     matrix.displayZoneText(2, temp, PA_CENTER, 75, 0, PA_PRINT);
   }
 
-  if(now.second() == 0 && now.minute() == 0 && sound)
+  if(now.second() == 0 && now.minute() == 0 && sound) {
     beepSound();
+    sound = false;
+    sound_interval = millis();
+  }
 
   if(!sound && (millis() - sound_interval) > 1000)
     sound = true;
