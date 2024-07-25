@@ -28,6 +28,7 @@
 #endif
 
 #define BUTTON_PIN 0
+#define BUZZER_PIN 14
 
 #define CLK_PIN   18
 #define DATA_PIN  23
@@ -63,6 +64,9 @@ Timezone CE(CET, CEST);
 char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 char months[12][4] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
+bool sound = true;
+int sound_interval = 0;
+
 //display selector and screens
 uint8_t displaySelector = 0;
 enum screen{
@@ -71,152 +75,73 @@ enum screen{
   HUMIDITY_PRESSURE
 };
 
-void setup()
-{
-  Serial.begin(115200);
+void setNTPTime() {
+  /**
+   * @brief SET NTP TIME
+   * tries to sync the RTC time with NTP server
+   * if it finds an open WiFi AP
+   */
 
-  //initialize button
-  screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
-  screen_button.interval(5);
-  screen_button.setPressedState(LOW);
-
-  if(!matrix.begin(9)) {
-    Serial.printf("Could not find MAX7219! Check wiring!\n");
-    while(true);
-  }
-
-  if (!rtc.begin(&Wire)) {
-    Serial.printf("Could not find DS3231 RTC! Check wiring!\n");
-    while(true);
-  }
-
-  if (!bme.begin(BME280_ADDR, &Wire)) {
-    Serial.println("Could not find BME280 sensor! Check wiring!\n");
-    while(true);
-  }
-
-  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, BH1750_ADDR, &Wire)) {
-    Serial.println("Could not find BH1750 sensor! Check wiring!\n");
-    while(true);
-  }
-
-  if (rtc.lostPower()) {
-    // if the RTC lost power, set the time trying to sync with NTP server
-    Serial.printf("RTC lost power. Press the button for trying to set the time.\n");
-
-    matrix.setZone(7, 4, 7);
-    matrix.setZone(8, 0, 3);
-    matrix.setFont(7, small_font);
-    matrix.setFont(8, small_font);
-    matrix.setZoneEffect(7, 1, PA_FLIP_UD);
-    matrix.setZoneEffect(7, 1, PA_FLIP_LR);
-    matrix.displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
-    matrix.displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
-    matrix.synchZoneStart();
-    matrix.displayAnimate();
-
-    //wait for button press
-    while(!screen_button.pressed())
-      screen_button.update();
-
-    Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
-
-    WiFi.mode(WIFI_STA);
-
-    //scan for open WiFi AP
-    uint8_t n_net = WiFi.scanNetworks();
-    bool open_ap_found = false;
-    char ssid[256];
-
-    if (n_net) {
-      Serial.println("Network found!\n");
-      for (uint8_t i = 0; i < n_net; ++i) {
-        if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
-          strcpy(ssid, WiFi.SSID(i).c_str());
-          open_ap_found = true;
-          break;
-        }
+  WiFi.mode(WIFI_STA);
+  //scan for open WiFi AP
+  uint8_t n_net = WiFi.scanNetworks();
+  bool open_ap_found = false;
+  char ssid[256];
+  if (n_net) {
+    Serial.println("Network found!\n");
+    for (uint8_t i = 0; i < n_net; ++i) {
+      if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
+        strcpy(ssid, WiFi.SSID(i).c_str());
+        open_ap_found = true;
+        break;
       }
+    }
+  }
+  else {
+    Serial.println("No network found.\n");
+  }
+  if(open_ap_found) {
+    WiFi.begin(ssid);
+    Serial.printf("Connecting to %s ", ssid);
+    while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
+      delay(100);
+    Serial.printf("\nConnected to %s.\n", ssid);
+    timeClient.begin();
+    delay(50);
+    timeClient.update();
+    delay(500);
+    if(timeClient.isTimeSet()) {
+      rtc.adjust(timeClient.getEpochTime());
+      Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", ssid);
     }
     else {
-      Serial.println("No network found.\n");
-    }
-
-    if(open_ap_found) {
-      WiFi.begin(ssid);
-      Serial.printf("Connecting to %s ", ssid);
-
-      while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
-        delay(100);
-
-      Serial.printf("\nConnected to %s.\n", ssid);
-
-      timeClient.begin();
-      delay(50);
-      timeClient.update();
-      delay(500);
-
-      if(timeClient.isTimeSet()) {
-        rtc.adjust(timeClient.getEpochTime());
-        Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", ssid);
-      }
-      else {
-        Serial.printf("NTP server error. Time not set.\n");
-        rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
-      }
-
-      WiFi.disconnect();
-    }
-    else {
-      Serial.printf("WiFi AP not found. Cannot Sync time.\n");
+      Serial.printf("NTP server error. Time not set.\n");
       rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
     }
+    WiFi.disconnect();
+  }
+  else {
+    Serial.printf("WiFi AP not found. Cannot Sync time.\n");
+    rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
+  }
+}
+
+void beepSound() {
+  /**
+   * @brief BEEP SOUND
+   * generates a beep sound with the buzzer
+   */
+
+  int beep[] = {6750, 0, 6750};
+
+  for (int thisNote = 0; thisNote < (sizeof(beep) / sizeof(beep[0])); thisNote++) {
+    int noteDuration = 1000 / 10;
+    tone(BUZZER_PIN, beep[thisNote], noteDuration);
+    noTone(BUZZER_PIN);
   }
 
-  //setting up zones of the matrix display
-
-  // upper screen for HH:MM and SS
-  matrix.setZone(0, 7, 7);
-  matrix.setZone(1, 4, 6);
-
-  // lower screen for temperature
-  matrix.setZone(2, 0, 3);
-
-  // flip the upper screen
-  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
-  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
-
-  matrix.setFont(0, small_font);
-  matrix.setFont(1, pixel_font);
-  matrix.setFont(2, pixel_font);
-
-  // upper screen for DDD DD
-  matrix.setZone(3, 4, 7);
-  // lower screen for MMM YYYY
-  matrix.setZone(4, 0, 3);
-
-  // flip the upper screen
-  matrix.setZoneEffect(3, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(3, 1, PA_FLIP_LR);
-
-  matrix.setFont(3, small_font);
-  matrix.setFont(4, small_font);
-
-  // upper screen for humidity
-  matrix.setZone(5, 4, 7);
-  // lower screen for pressure
-  matrix.setZone(6, 0, 3);
-
-  // flip the upper screen
-  matrix.setZoneEffect(5, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(5, 1, PA_FLIP_LR);
-
-  matrix.setFont(5, pixel_font);
-  matrix.setFont(6, pixel_font);
-
-  matrix.displayClear();
+  sound = false;
+  sound_interval = millis();
 }
 
 void print_time_temp() {
@@ -227,6 +152,13 @@ void print_time_temp() {
   *  then to local time
   *  then prints the time on the matrix display
   *  formatted as HH:MM SS
+  * 
+  *  then picks up the temperature from BME280 sensor
+  *  and prints it on the matrix display
+  * 
+  *  the seconds are blinking every second
+  * 
+  *  a beep sound is generated every hour with the buzzer
   */
 
   char hh_mm[6];
@@ -246,6 +178,12 @@ void print_time_temp() {
     matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT);
     matrix.displayZoneText(2, temp, PA_CENTER, 75, 0, PA_PRINT);
   }
+
+  if(now.second() == 0 && now.minute() == 0 && sound)
+    beepSound();
+
+  if(!sound && (millis() - sound_interval) > 1000)
+    sound = true;
 }
 
 void print_date() {
@@ -312,6 +250,106 @@ void set_intensity() {
   */
   if(light_sensor.measurementReady())
     matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  //initialize button
+  screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
+  screen_button.interval(5);
+  screen_button.setPressedState(LOW);
+
+  if(!matrix.begin(9)) {
+    Serial.printf("Could not find MAX7219! Check wiring!\n");
+    while(true);
+  }
+
+  if (!rtc.begin(&Wire)) {
+    Serial.printf("Could not find DS3231 RTC! Check wiring!\n");
+    while(true);
+  }
+
+  if (!bme.begin(BME280_ADDR, &Wire)) {
+    Serial.println("Could not find BME280 sensor! Check wiring!\n");
+    while(true);
+  }
+
+  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, BH1750_ADDR, &Wire)) {
+    Serial.println("Could not find BH1750 sensor! Check wiring!\n");
+    while(true);
+  }
+
+  if (rtc.lostPower()) {
+    // if the RTC lost power, set the time trying to sync with NTP server
+    Serial.printf("RTC lost power. Press the button for trying to set the time.\n");
+
+    matrix.setZone(7, 4, 7);
+    matrix.setZone(8, 0, 3);
+    matrix.setFont(7, small_font);
+    matrix.setFont(8, small_font);
+    matrix.setZoneEffect(7, 1, PA_FLIP_UD);
+    matrix.setZoneEffect(7, 1, PA_FLIP_LR);
+    matrix.displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
+    matrix.displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
+    matrix.synchZoneStart();
+    matrix.displayAnimate();
+
+    //wait for button press
+    while(!screen_button.pressed())
+      screen_button.update();
+
+    Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
+
+    setNTPTime();
+  }
+
+  //setting up zones of the matrix display
+
+  // upper screen for HH:MM and SS
+  matrix.setZone(0, 7, 7);
+  matrix.setZone(1, 4, 6);
+
+  // lower screen for temperature
+  matrix.setZone(2, 0, 3);
+
+  // flip the upper screen
+  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
+  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
+
+  matrix.setFont(0, small_font);
+  matrix.setFont(1, pixel_font);
+  matrix.setFont(2, pixel_font);
+
+  // upper screen for DDD DD
+  matrix.setZone(3, 4, 7);
+  // lower screen for MMM YYYY
+  matrix.setZone(4, 0, 3);
+
+  // flip the upper screen
+  matrix.setZoneEffect(3, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(3, 1, PA_FLIP_LR);
+
+  matrix.setFont(3, small_font);
+  matrix.setFont(4, small_font);
+
+  // upper screen for humidity
+  matrix.setZone(5, 4, 7);
+  // lower screen for pressure
+  matrix.setZone(6, 0, 3);
+
+  // flip the upper screen
+  matrix.setZoneEffect(5, 1, PA_FLIP_UD);
+  matrix.setZoneEffect(5, 1, PA_FLIP_LR);
+
+  matrix.setFont(5, pixel_font);
+  matrix.setFont(6, pixel_font);
+
+  matrix.displayClear();
 }
 
 void loop()
