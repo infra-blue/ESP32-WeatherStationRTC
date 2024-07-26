@@ -75,7 +75,7 @@ enum screen{
   HUMIDITY_PRESSURE
 };
 
-void setNTPTime() {
+void set_NTP_time() {
   /**
    * @brief SET NTP TIME
    * tries to sync the RTC time with NTP server
@@ -89,27 +89,30 @@ void setNTPTime() {
   char ssid[256];
   if (n_net) {
     Serial.println("Network found!\n");
-    for (uint8_t i = 0; i < n_net; ++i) {
+    for (uint8_t i = 0; i < n_net; ++i)
       if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
         strcpy(ssid, WiFi.SSID(i).c_str());
         open_ap_found = true;
         break;
       }
-    }
   }
-  else {
+  else
     Serial.println("No network found.\n");
-  }
+
   if(open_ap_found) {
     WiFi.begin(ssid);
     Serial.printf("Connecting to %s ", ssid);
+
     while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
       delay(100);
+
     Serial.printf("\nConnected to %s.\n", ssid);
+
     timeClient.begin();
     delay(50);
     timeClient.update();
     delay(500);
+
     if(timeClient.isTimeSet()) {
       rtc.adjust(timeClient.getEpochTime());
       Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", ssid);
@@ -120,28 +123,28 @@ void setNTPTime() {
     }
     WiFi.disconnect();
   }
+
   else {
     Serial.printf("WiFi AP not found. Cannot Sync time.\n");
     rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
   }
 }
 
-void beepSound() {
+void beep_sound() {
   /**
    * @brief BEEP SOUND
    * generates a beep sound with the buzzer
    */
 
-  int beep[] = {6750, 0, 6750};
+  int beep[] = {7551, 0, 7551};
 
   for (int thisNote = 0; thisNote < (sizeof(beep) / sizeof(beep[0])); thisNote++) {
-    int noteDuration = 1000 / 10;
-    tone(BUZZER_PIN, beep[thisNote], noteDuration);
+    tone(BUZZER_PIN, beep[thisNote], 110);
     noTone(BUZZER_PIN);
   }
 }
 
-void print_time_temp() {
+void print_time_temp(DateTime now) {
   /**
   * @brief TIME AND TEMPERATURE
   *  picks up the current time from RTC (which is in DateTime class)
@@ -162,8 +165,6 @@ void print_time_temp() {
   char ss[3];
   char temp[10];
 
-  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
-
   sprintf(hh_mm, "%02d%c%02d", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
   sprintf(ss, "%02d", now.second());
   sprintf(temp, "%3.1f °C", bme.readTemperature());
@@ -175,18 +176,9 @@ void print_time_temp() {
     matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT);
     matrix.displayZoneText(2, temp, PA_CENTER, 75, 0, PA_PRINT);
   }
-
-  if(now.second() == 0 && now.minute() == 0 && sound) {
-    beepSound();
-    sound = false;
-    sound_interval = millis();
-  }
-
-  if(!sound && (millis() - sound_interval) > 1000)
-    sound = true;
 }
 
-void print_date() {
+void print_date(DateTime now) {
   /**
   * @brief DATE
   * picks up the current time from RTC (which is in DateTime class)
@@ -197,8 +189,6 @@ void print_date() {
   */
   char ddd_dd[7];
   char mmm_yyyy[9];
-
-  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
 
   sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek()], now.day());
   sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
@@ -256,6 +246,7 @@ void setup()
 {
   Serial.begin(115200);
   pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
 
   //initialize button
   screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
@@ -303,7 +294,7 @@ void setup()
 
     Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
 
-    setNTPTime();
+    set_NTP_time();
   }
 
   //setting up zones of the matrix display
@@ -365,16 +356,19 @@ void loop()
   * the display is turned off
   * and turned on again when the button is pressed again
   */
+
+  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
+
   screen_button.update();
   if (screen_button.released())
     ++displaySelector %= 3;
 
   switch(displaySelector) {
     case CLOCK_TEMP:
-      print_time_temp();
+      print_time_temp(now);
       break;
     case DATE:
-      print_date();
+      print_date(now);
       break;
     case HUMIDITY_PRESSURE:
       print_hum_pres();
@@ -392,6 +386,15 @@ void loop()
 
     matrix.displayShutdown(false);
   }
+
+  if(now.second() == 0 && now.minute() == 0 && sound) {
+    beep_sound();
+    sound = false;
+    sound_interval = millis();
+  }
+
+  if(!sound && (millis() - sound_interval) > 1000)
+    sound = true;
 
   set_intensity();
 }
