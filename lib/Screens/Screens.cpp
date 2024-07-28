@@ -7,7 +7,7 @@
 
 #include "Screens.h"
 
-void print_time_temp(DateTime now) {
+void print_time_temp() {
   /**
   * @brief TIME AND TEMPERATURE
   *  picks up the current time from RTC (which is in DateTime class)
@@ -20,16 +20,14 @@ void print_time_temp(DateTime now) {
   *  and prints it on the matrix display
   * 
   *  the seconds are blinking every second
-  * 
-  *  a beep sound is generated every hour with the buzzer
   */
 
   char hh_mm[6];
   char ss[3];
   char temp[10];
 
-  sprintf(hh_mm, "%02d%c%02d", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
-  sprintf(ss, "%02d", now.second());
+  sprintf(hh_mm, "%02d%c%02d", current_time.hour(), ((current_time.second() % 2) ? ':' : ' '), current_time.minute());
+  sprintf(ss, "%02d", current_time.second());
   sprintf(temp, "%3.1f °C", bme.readTemperature());
 
   //print time and temperature
@@ -41,7 +39,7 @@ void print_time_temp(DateTime now) {
   }
 }
 
-void print_date(DateTime now) {
+void print_date() {
   /**
   * @brief DATE
   * picks up the current time from RTC (which is in DateTime class)
@@ -53,8 +51,8 @@ void print_date(DateTime now) {
   char ddd_dd[7];
   char mmm_yyyy[9];
 
-  sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek()], now.day());
-  sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
+  sprintf(ddd_dd, "%s %02d", days[current_time.dayOfTheWeek()], current_time.day());
+  sprintf(mmm_yyyy, "%s %d", months[current_time.month() - 1], current_time.year());
 
   //print date
   matrix.synchZoneStart();

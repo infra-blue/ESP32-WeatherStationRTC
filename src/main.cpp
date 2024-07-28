@@ -34,6 +34,8 @@ uint8_t buzzer = BUZZER_PIN;
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, INRIM);
 
+DateTime current_time;
+
 //days and months
 char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 char months[12][4] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
@@ -158,7 +160,7 @@ void loop()
   * and turned on again when the button is pressed again
   */
 
-  DateTime now = localTimezone->toLocal((rtc.now()).unixtime());
+  current_time = localTimezone->toLocal((rtc.now()).unixtime());
 
   screen_button.update();
   if (screen_button.released())
@@ -166,10 +168,10 @@ void loop()
 
   switch(displaySelector) {
     case CLOCK_TEMP:
-      print_time_temp(now);
+      print_time_temp();
       break;
     case DATE:
-      print_date(now);
+      print_date();
       break;
     case HUMIDITY_PRESSURE:
       print_hum_pres();
@@ -188,7 +190,7 @@ void loop()
     matrix.displayShutdown(false);
   }
 
-  if(now.second() == 0 && now.minute() == 0 && sound) {
+  if(current_time.second() == 0 && current_time.minute() == 0 && sound) {
     beep_sound();
     sound = false;
     sound_interval = millis();
