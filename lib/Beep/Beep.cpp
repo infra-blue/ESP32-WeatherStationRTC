@@ -8,7 +8,7 @@ void beep_sound() {
    * generates a beep sound with the buzzer
    */
 
-  int beep[] = {7551, 0, 7551};
+  int beep[] = {8156, 0, 8156};
 
   for (int thisNote = 0; thisNote < (sizeof(beep) / sizeof(beep[0])); thisNote++) {
     tone(buzzer, beep[thisNote], 110);
