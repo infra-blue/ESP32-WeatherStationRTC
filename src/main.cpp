@@ -13,44 +13,21 @@
 #include <BH1750.h>
 #include <Bounce2.h>
 
+#include <Ntp_Servers.h>
+#include <Macros.h>
 #include <Font_Data.h>
+#include <Screens.h>
+#include <Set_NTP_Time.h>
+#include <Set_Intensity.h>
+#include <Beep.h>
 
-#ifndef BME280_ADDR
-#define BME280_ADDR 0x76
-#endif
-
-#ifndef BH1750_ADDR
-#define BH1750_ADDR 0x23
-#endif
-
-#ifndef DS3231_ADDR
-#define DS3231_ADDR 0x68
-#endif
-
-#define BUTTON_PIN 0
-#define BUZZER_PIN 14
-
-#define CLK_PIN   18
-#define DATA_PIN  23
-#define CS_PIN    5
-
-#define MAX_DEVICES 8
-#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
-
-//NTP servers
-#define MCNTP "time.windows.com"
-#define POOLNTP "pool.ntp.org"
-#define POOLNTP1 "0.it.pool.ntp.org"
-#define INRIM "time.inrim.it"
-#define INRIM1 "ntp1.inrim.it"
-#define INRIM2 "ntp2.inrim.it"
-
-MD_Parola matrix = MD_Parola(HARDWARE_TYPE, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+MD_Parola matrix = MD_Parola(MD_MAX72XX::FC16_HW, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 RTC_DS3231 rtc;
 Adafruit_BME280 bme;
 BH1750 light_sensor;
 
 Bounce2::Button screen_button = Bounce2::Button();
+uint8_t buzzer = BUZZER_PIN;
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, INRIM);
@@ -67,180 +44,12 @@ char months[12][4] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "S
 bool sound = true;
 int sound_interval = 0;
 
-//display selector and screens
 uint8_t displaySelector = 0;
 enum screen{
   CLOCK_TEMP,
   DATE,
   HUMIDITY_PRESSURE
 };
-
-void set_NTP_time() {
-  /**
-   * @brief SET NTP TIME
-   * tries to sync the RTC time with NTP server
-   * if it finds an open WiFi AP
-   */
-
-  WiFi.mode(WIFI_STA);
-  //scan for open WiFi AP
-  uint8_t n_net = WiFi.scanNetworks();
-  bool open_ap_found = false;
-  char ssid[256];
-  if (n_net) {
-    Serial.println("Network found!\n");
-    for (uint8_t i = 0; i < n_net; ++i)
-      if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
-        strcpy(ssid, WiFi.SSID(i).c_str());
-        open_ap_found = true;
-        break;
-      }
-  }
-  else
-    Serial.println("No network found.\n");
-
-  if(open_ap_found) {
-    WiFi.begin(ssid);
-    Serial.printf("Connecting to %s ", ssid);
-
-    while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
-      delay(100);
-
-    Serial.printf("\nConnected to %s.\n", ssid);
-
-    timeClient.begin();
-    delay(50);
-    timeClient.update();
-    delay(500);
-
-    if(timeClient.isTimeSet()) {
-      rtc.adjust(timeClient.getEpochTime());
-      Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", ssid);
-    }
-    else {
-      Serial.printf("NTP server error. Time not set.\n");
-      rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
-    }
-    WiFi.disconnect();
-  }
-
-  else {
-    Serial.printf("WiFi AP not found. Cannot Sync time.\n");
-    rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
-  }
-}
-
-void beep_sound() {
-  /**
-   * @brief BEEP SOUND
-   * generates a beep sound with the buzzer
-   */
-
-  int beep[] = {7551, 0, 7551};
-
-  for (int thisNote = 0; thisNote < (sizeof(beep) / sizeof(beep[0])); thisNote++) {
-    tone(BUZZER_PIN, beep[thisNote], 110);
-    noTone(BUZZER_PIN);
-  }
-}
-
-void print_time_temp(DateTime now) {
-  /**
-  * @brief TIME AND TEMPERATURE
-  *  picks up the current time from RTC (which is in DateTime class)
-  *  converts it to epochtime
-  *  then to local time
-  *  then prints the time on the matrix display
-  *  formatted as HH:MM SS
-  * 
-  *  then picks up the temperature from BME280 sensor
-  *  and prints it on the matrix display
-  * 
-  *  the seconds are blinking every second
-  * 
-  *  a beep sound is generated every hour with the buzzer
-  */
-
-  char hh_mm[6];
-  char ss[3];
-  char temp[10];
-
-  sprintf(hh_mm, "%02d%c%02d", now.hour(), ((now.second() % 2) ? ':' : ' '), now.minute());
-  sprintf(ss, "%02d", now.second());
-  sprintf(temp, "%3.1f °C", bme.readTemperature());
-
-  //print time and temperature
-  matrix.synchZoneStart();
-  if(matrix.displayAnimate()) {
-    matrix.displayZoneText(0, ss, PA_CENTER, 75, 0, PA_PRINT);
-    matrix.displayZoneText(1, hh_mm, PA_CENTER, 75, 0, PA_PRINT);
-    matrix.displayZoneText(2, temp, PA_CENTER, 75, 0, PA_PRINT);
-  }
-}
-
-void print_date(DateTime now) {
-  /**
-  * @brief DATE
-  * picks up the current time from RTC (which is in DateTime class)
-  * converts it to epochtime
-  * then to local time
-  * then prints the date on the matrix display
-  * formatted as DDD DD MMM YYYY
-  */
-  char ddd_dd[7];
-  char mmm_yyyy[9];
-
-  sprintf(ddd_dd, "%s %02d", days[now.dayOfTheWeek()], now.day());
-  sprintf(mmm_yyyy, "%s %d", months[now.month() - 1], now.year());
-
-  //print date
-  matrix.synchZoneStart();
-  if(matrix.displayAnimate()) {
-    matrix.displayZoneText(3, ddd_dd, PA_CENTER, 75, 0, PA_PRINT);
-    matrix.displayZoneText(4, mmm_yyyy, PA_CENTER, 75, 0, PA_PRINT);
-  }
-}
-
-void print_hum_pres() {
-  /**
-  * @brief HUMIDITY AND PRESSURE
-  * picks up the current humidity and pressure from BME280 sensor
-  * then prints the humidity and pressure on the matrix display
-  * formatted as HHH.H% and PPPP.P
-  */
-
-  char hum[9];
-  char pres[9];
-
-  if(bme.readHumidity() < 100.0)
-    sprintf(hum, "H %3.1f%%", bme.readHumidity());
-  else
-    sprintf(hum, "H %3.0f%%", bme.readHumidity());
-
-  if((bme.readPressure() / 100.0) < 1000.0)
-    sprintf(pres, "P %4.1f", bme.readPressure() / 100.0);
-  else
-    sprintf(pres, "P%5.1f", bme.readPressure() / 100.0);
-
-  //print humidity and pressure
-  matrix.synchZoneStart();
-  if(matrix.displayAnimate()) {
-    matrix.displayZoneText(5, hum, PA_RIGHT, 75, 0, PA_PRINT);
-    matrix.displayZoneText(6, pres, PA_LEFT, 75, 0, PA_PRINT);
-  }
-}
-
-void set_intensity() {
-  /**
-  * @brief AUTO SET INTENSITY
-  * picks up the current light level from BH1750 sensor
-  * then sets the intensity of the matrix display
-  * based on the light level
-  * mapped from to 0 to 15 (max level limited to 300 for more sensitivity)
-  */
-  if(light_sensor.measurementReady())
-    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
-}
 
 void setup()
 {
