@@ -15,6 +15,8 @@
 
 #include <Ntp_Servers.h>
 #include <Macros.h>
+#include <TimeZoneConf.h>
+
 #include <Font_Data.h>
 #include <Screens.h>
 #include <Set_NTP_Time.h>
@@ -31,11 +33,6 @@ uint8_t buzzer = BUZZER_PIN;
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, INRIM);
-
-//Central European Time (Rome)
-TimeChangeRule CET = {"CET", Last, Sun, Oct, 3, 60};    // Daylight time = UTC + 1 hour
-TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Standard time = UTC + 2 hours
-Timezone CE(CET, CEST);
 
 //days and months
 char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
@@ -54,8 +51,8 @@ enum screen{
 void setup()
 {
   Serial.begin(115200);
-  pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
+  pinMode(buzzer, OUTPUT);
+  digitalWrite(buzzer, LOW);
 
   //initialize button
   screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
@@ -166,7 +163,7 @@ void loop()
   * and turned on again when the button is pressed again
   */
 
-  DateTime now = DateTime(CE.toLocal((rtc.now()).unixtime()));
+  DateTime now = DateTime(localTimezone->toLocal((rtc.now()).unixtime()));
 
   screen_button.update();
   if (screen_button.released())
