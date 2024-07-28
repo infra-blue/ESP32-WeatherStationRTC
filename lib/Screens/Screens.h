@@ -14,6 +14,12 @@ extern Adafruit_BME280 bme;
 extern char days[7][4];
 extern char months[12][4];
 
+enum screen{
+  CLOCK_TEMP,
+  DATE,
+  HUMIDITY_PRESSURE
+};
+
 void print_time_temp(DateTime now);
 void print_date(DateTime now);
 void print_hum_pres();

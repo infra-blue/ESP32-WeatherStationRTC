@@ -42,11 +42,6 @@ bool sound = true;
 int sound_interval = 0;
 
 uint8_t displaySelector = 0;
-enum screen{
-  CLOCK_TEMP,
-  DATE,
-  HUMIDITY_PRESSURE
-};
 
 void setup()
 {
@@ -163,7 +158,7 @@ void loop()
   * and turned on again when the button is pressed again
   */
 
-  DateTime now = DateTime(localTimezone->toLocal((rtc.now()).unixtime()));
+  DateTime now = localTimezone->toLocal((rtc.now()).unixtime());
 
   screen_button.update();
   if (screen_button.released())
