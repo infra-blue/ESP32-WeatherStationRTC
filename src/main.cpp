@@ -144,6 +144,14 @@ void setup()
   matrix.setFont(6, pixel_font);
 
   matrix.displayClear();
+
+  bme.setSampling(Adafruit_BME280::MODE_NORMAL,
+                  Adafruit_BME280::SAMPLING_X1,
+                  Adafruit_BME280::SAMPLING_X1,
+                  Adafruit_BME280::SAMPLING_X1,
+                  Adafruit_BME280::FILTER_OFF,
+                  Adafruit_BME280::STANDBY_MS_1000
+                  );
 }
 
 void loop()
