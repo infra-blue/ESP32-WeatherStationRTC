@@ -51,8 +51,8 @@ void print_date() {
   char ddd_dd[7];
   char mmm_yyyy[9];
 
-  sprintf(ddd_dd, "%s %02d", days[current_time.dayOfTheWeek()], current_time.day());
-  sprintf(mmm_yyyy, "%s %d", months[current_time.month() - 1], current_time.year());
+  sprintf(ddd_dd, "%s %02d", days["en"][current_time.dayOfTheWeek()], current_time.day());
+  sprintf(mmm_yyyy, "%s %d", months["en"][current_time.month() - 1], current_time.year());
 
   //print date
   matrix.synchZoneStart();

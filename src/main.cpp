@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <FS.h>
+#include <SPIFFS.h>
 #include <Adafruit_I2CDevice.h>
 #include <SPI.h>
 #include <RTClib.h>
@@ -12,6 +14,11 @@
 #include <Adafruit_BME280.h>
 #include <BH1750.h>
 #include <Bounce2.h>
+#include <ArduinoJson.h>
+
+#include <unordered_map>
+#include <vector>
+#include <string>
 
 #include <Ntp_Servers.h>
 #include <Macros.h>
@@ -22,6 +29,8 @@
 #include <Set_NTP_Time.h>
 #include <Set_Intensity.h>
 #include <Beep.h>
+
+#define path_to_conf "/config.json"
 
 MD_Parola matrix = MD_Parola(MD_MAX72XX::FC16_HW, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
 RTC_DS3231 rtc;
@@ -36,18 +45,59 @@ NTPClient timeClient(ntpUDP, INRIM);
 
 DateTime current_time;
 
-//days and months
-char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
-char months[12][4] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+std::unordered_map<std::string, std::vector<std::string>> months = {
+    {"en", {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}},
+    {"it", {"Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"}},
+    {"es", {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"}},
+    {"fr", {"Jan", "Fev", "Mar", "Avr", "Mai", "Jun", "Jul", "Aou", "Sep", "Oct", "Nov", "Dec"}},
+    {"de", {"Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"}}
+};
+
+std::unordered_map<std::string, std::vector<std::string>> days = {
+    {"en", {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}},
+    {"it", {"Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"}},
+    {"es", {"Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"}},
+    {"fr", {"Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"}},
+    {"de", {"Son", "Mon", "Die", "Mit", "Don", "Fre", "Sam"}}
+};
+
+struct Config {
+  char hostname[64];
+  int port;
+};
 
 bool sound = true;
 int sound_interval = 0;
 
 uint8_t displaySelector = 0;
+Config conf;
+
+void loadConfiguration(Config& config) {
+  File file = SPIFFS.open(path_to_conf, "r");
+  JsonDocument doc;
+
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+    Serial.println(F("Failed to read file, using default configuration"));
+
+  config.port = doc["port"] | 2731;
+  strlcpy(config.hostname,                  // <- destination
+          doc["hostname"] | "example.com",  // <- source
+          sizeof(config.hostname));         // <- destination's capacity
+
+  file.close();
+}
 
 void setup()
 {
   Serial.begin(115200);
+
+  if(!SPIFFS.begin()){
+    Serial.println("Failed to mount SPIFFS.\n");
+    return;
+  }
+  Serial.println("SPIFFS mounted successfully.\n");
+
   pinMode(buzzer, OUTPUT);
   digitalWrite(buzzer, LOW);
 

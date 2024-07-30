@@ -1,0 +1,39 @@
+{
+    "TIMECHANGERULE": {
+        "abbrev": "string",
+        "week": 0,
+        "dow": 0,
+        "month": 0,
+        "hour": 0,
+        "offset": 0
+    },
+
+    "I2C_ADDR": {
+        "BME_280": 118,
+        "BH1750": 35,
+        "DS3231": 104
+    },
+
+    "MAX7219_PINS": {
+        "CLK_PIN": 18,
+        "DATA_PIN": 23,
+        "CS_PIN": 5
+    },
+
+    "PINS": {
+        "BUTTON_PIN": 0,
+        "BUZZER_PIN": 14
+    },
+
+    "NTP_SERVER": "time.inrim.it",
+
+    "LANGUAGE": "en",
+
+    "BUZZ_SOUND": true,
+
+    "WIFI": {
+        "SSID": "",
+        "PASSWORD": ""
+    }
+}
+
