@@ -1,4 +1,4 @@
-name: PlatformIO_Build_And_Release
+name: PlatformIO
 
 on:
   push:
