@@ -14,7 +14,7 @@ jobs:
         uses: karniv00l/platformio-run-action@v1.1.2
         with:
           environments: "esp32dev"
-          targets: size
+          targets: buildfs
           project-conf: "./platformio.ini"
           jobs: 6
           silent: false
