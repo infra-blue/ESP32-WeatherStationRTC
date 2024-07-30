@@ -19,3 +19,20 @@ jobs:
           silent: false
           verbose: true
           disable-auto-clean: false
+      - name: Build
+        run: echo ${{ github.sha }} > Release.txt
+      - name: Test
+        run: cat Release.txt
+      - name: Release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          files: |
+            .pio/build/*
+            data/*
+            include/*
+            lib/*
+            src/*
+            no_ota.csv
+            platformio.ini
+            Release.txt
+            LICENSE
