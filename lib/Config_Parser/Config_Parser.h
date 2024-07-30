@@ -42,5 +42,6 @@ struct Config {
 };
 
 void loadConfiguration(Config& config);
+void printConfiguration(Config config);
 
 #endif

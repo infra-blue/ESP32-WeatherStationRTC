@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-extern std::unordered_map<std::string, std::vector<std::string>> months;
-extern std::unordered_map<std::string, std::vector<std::string>> days;
+extern std::unordered_map<std::string, std::vector<const char*>> months;
+extern std::unordered_map<std::string, std::vector<const char*>> days;
 
 #endif

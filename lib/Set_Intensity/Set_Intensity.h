@@ -6,7 +6,7 @@
 #include <MD_Parola.h>
 
 extern BH1750 light_sensor;
-extern MD_Parola matrix;
+extern MD_Parola* matrix;
 
 void set_intensity();
 

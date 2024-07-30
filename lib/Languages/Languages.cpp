@@ -4,7 +4,7 @@
 
 #include "Languages.h"
 
-std::unordered_map<std::string, std::vector<std::string>> months = {
+std::unordered_map<std::string, std::vector<const char*>> months = {
     {"en", {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}},
     {"it", {"Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"}},
     {"es", {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"}},
@@ -12,7 +12,7 @@ std::unordered_map<std::string, std::vector<std::string>> months = {
     {"de", {"Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"}}
 };
 
-std::unordered_map<std::string, std::vector<std::string>> days = {
+std::unordered_map<std::string, std::vector<const char*>> days = {
     {"en", {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}},
     {"it", {"Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"}},
     {"es", {"Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"}},

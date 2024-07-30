@@ -32,21 +32,18 @@
 
 Config conf;
 
-MD_Parola matrix = MD_Parola(HW_TYPE, conf.max7219.DATA_PIN, conf.max7219.CLK_PIN, conf.max7219.CS_PIN, MAX7219_DEVICES);
+MD_Parola* matrix = nullptr;
 RTC_DS3231 rtc;
 Adafruit_BME280 bme;
 BH1750 light_sensor;
 
 Bounce2::Button screen_button = Bounce2::Button();
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, conf.ntpServer);
-
 DateTime current_time;
 
-Timezone TMZ(conf.std, conf.dlt);
+Timezone *TMZ = nullptr;
 
-bool sound = true;
+bool tic = true;
 int sound_interval = 0;
 
 uint8_t displaySelector = 0;
@@ -63,6 +60,9 @@ void setup()
 
   loadConfiguration(conf);
 
+  TMZ = new Timezone(conf.std, conf.dlt);
+  matrix = new MD_Parola(HW_TYPE, conf.max7219.DATA_PIN, conf.max7219.CLK_PIN, conf.max7219.CS_PIN, MAX7219_DEVICES);
+
   pinMode(conf.pins.BUZZER_PIN, OUTPUT);
   digitalWrite(conf.pins.BUZZER_PIN, LOW);
 
@@ -70,7 +70,7 @@ void setup()
   screen_button.interval(5);
   screen_button.setPressedState(LOW);
 
-  if(!matrix.begin(9)) {
+  if(!matrix->begin(9)) {
     Serial.printf("%s %s\n", MAX7219_ERR, WIRE_ERR);
     while(true);
   }
@@ -93,18 +93,17 @@ void setup()
   if (rtc.lostPower()) {
     Serial.printf("%s\n", RTC_POWER_LOST);
 
-    matrix.setZone(7, 4, 7);
-    matrix.setZone(8, 0, 3);
-    matrix.setFont(7, small_font);
-    matrix.setFont(8, small_font);
-    matrix.setZoneEffect(7, 1, PA_FLIP_UD);
-    matrix.setZoneEffect(7, 1, PA_FLIP_LR);
-    matrix.displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
-    matrix.displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
-    matrix.synchZoneStart();
-    matrix.displayAnimate();
+    matrix->setZone(7, 4, 7);
+    matrix->setZone(8, 0, 3);
+    matrix->setFont(7, small_font);
+    matrix->setFont(8, small_font);
+    matrix->setZoneEffect(7, 1, PA_FLIP_UD);
+    matrix->setZoneEffect(7, 1, PA_FLIP_LR);
+    matrix->displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
+    matrix->displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
+    matrix->synchZoneStart();
+    matrix->displayAnimate();
 
-    //wait for button press
     while(!screen_button.pressed())
       screen_button.update();
 
@@ -113,40 +112,39 @@ void setup()
     set_NTP_time();
   }
 
-  //setting up zones of the matrix display
-  matrix.setZone(0, 7, 7);
-  matrix.setZone(1, 4, 6);
+  matrix->setZone(0, 7, 7);
+  matrix->setZone(1, 4, 6);
 
-  matrix.setZone(2, 0, 3);
+  matrix->setZone(2, 0, 3);
 
-  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
-  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
+  matrix->setZoneEffect(0, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(0, 1, PA_FLIP_LR);
+  matrix->setZoneEffect(1, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(1, 1, PA_FLIP_LR);
 
-  matrix.setFont(0, small_font);
-  matrix.setFont(1, pixel_font);
-  matrix.setFont(2, pixel_font);
+  matrix->setFont(0, small_font);
+  matrix->setFont(1, pixel_font);
+  matrix->setFont(2, pixel_font);
 
-  matrix.setZone(3, 4, 7);
-  matrix.setZone(4, 0, 3);
+  matrix->setZone(3, 4, 7);
+  matrix->setZone(4, 0, 3);
 
-  matrix.setZoneEffect(3, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(3, 1, PA_FLIP_LR);
+  matrix->setZoneEffect(3, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(3, 1, PA_FLIP_LR);
 
-  matrix.setFont(3, small_font);
-  matrix.setFont(4, small_font);
+  matrix->setFont(3, small_font);
+  matrix->setFont(4, small_font);
 
-  matrix.setZone(5, 4, 7);
-  matrix.setZone(6, 0, 3);
+  matrix->setZone(5, 4, 7);
+  matrix->setZone(6, 0, 3);
 
-  matrix.setZoneEffect(5, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(5, 1, PA_FLIP_LR);
+  matrix->setZoneEffect(5, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(5, 1, PA_FLIP_LR);
 
-  matrix.setFont(5, pixel_font);
-  matrix.setFont(6, pixel_font);
+  matrix->setFont(5, pixel_font);
+  matrix->setFont(6, pixel_font);
 
-  matrix.displayClear();
+  matrix->displayClear();
 
   bme.setSampling(Adafruit_BME280::MODE_NORMAL,
                   Adafruit_BME280::SAMPLING_X1,
@@ -155,6 +153,8 @@ void setup()
                   Adafruit_BME280::FILTER_OFF,
                   Adafruit_BME280::STANDBY_MS_1000
                   );
+
+  printConfiguration(conf);
 }
 
 void loop()
@@ -171,7 +171,7 @@ void loop()
   * and turned on again when the button is pressed again
   */
 
-  current_time = TMZ.toLocal((rtc.now()).unixtime());
+  current_time = TMZ->toLocal((rtc.now()).unixtime());
 
   screen_button.update();
   if (screen_button.released())
@@ -190,7 +190,7 @@ void loop()
   }
 
   if(screen_button.isPressed() && screen_button.currentDuration() > 500) {
-    matrix.displayShutdown(true);
+    matrix->displayShutdown(true);
 
     while(!screen_button.pressed())
       screen_button.update();
@@ -198,17 +198,19 @@ void loop()
     while(!screen_button.released())
       screen_button.update();
 
-    matrix.displayShutdown(false);
+    matrix->displayShutdown(false);
   }
 
-  if(current_time.second() == 0 && current_time.minute() == 0 && sound) {
-    beep_sound();
-    sound = false;
-    sound_interval = millis();
-  }
+  if(conf.buzzSound){
+    if(current_time.second() == 0 && current_time.minute() == 0 && tic) {
+      beep_sound();
+      tic = false;
+      sound_interval = millis();
+    }
 
-  if(!sound && (millis() - sound_interval) > 1000)
-    sound = true;
+    if(!tic && (millis() - sound_interval) > 1000)
+      tic = true;
+  }
 
   set_intensity();
 }

@@ -11,13 +11,15 @@
 #include <vector>
 #include <string>
 
-extern MD_Parola matrix;
+#include <Languages.h>
+#include <Config_Parser.h>
+
+extern MD_Parola* matrix;
 extern RTC_DS3231 rtc;
 extern Adafruit_BME280 bme;
 extern DateTime current_time;
 
-extern std::unordered_map<std::string, std::vector<std::string>> months;
-extern std::unordered_map<std::string, std::vector<std::string>> days;
+extern Config conf;
 
 enum screen{
   CLOCK_TEMP,
