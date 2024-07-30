@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: PlatformIO Run
-        uses: karniv00l/platformio-run-action@v1
+        uses: infra-blue/platformio-run-action
         with:
           environments: "esp32dev"
           project-conf: "./platformio.ini"
