@@ -20,115 +20,78 @@
 #include <vector>
 #include <string>
 
-#include <Ntp_Servers.h>
 #include <Macros.h>
-#include <TimeZoneConf.h>
 
+#include <Config_Parser.h>
+#include <Languages.h>
 #include <Font_Data.h>
 #include <Screens.h>
 #include <Set_NTP_Time.h>
 #include <Set_Intensity.h>
 #include <Beep.h>
 
-#define path_to_conf "/config.json"
+Config conf;
 
-MD_Parola matrix = MD_Parola(MD_MAX72XX::FC16_HW, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+MD_Parola matrix = MD_Parola(HW_TYPE, conf.max7219.DATA_PIN, conf.max7219.CLK_PIN, conf.max7219.CS_PIN, MAX7219_DEVICES);
 RTC_DS3231 rtc;
 Adafruit_BME280 bme;
 BH1750 light_sensor;
 
 Bounce2::Button screen_button = Bounce2::Button();
-uint8_t buzzer = BUZZER_PIN;
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, INRIM);
+NTPClient timeClient(ntpUDP, conf.ntpServer);
 
 DateTime current_time;
 
-std::unordered_map<std::string, std::vector<std::string>> months = {
-    {"en", {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}},
-    {"it", {"Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"}},
-    {"es", {"Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"}},
-    {"fr", {"Jan", "Fev", "Mar", "Avr", "Mai", "Jun", "Jul", "Aou", "Sep", "Oct", "Nov", "Dec"}},
-    {"de", {"Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"}}
-};
-
-std::unordered_map<std::string, std::vector<std::string>> days = {
-    {"en", {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}},
-    {"it", {"Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"}},
-    {"es", {"Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"}},
-    {"fr", {"Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"}},
-    {"de", {"Son", "Mon", "Die", "Mit", "Don", "Fre", "Sam"}}
-};
-
-struct Config {
-  char hostname[64];
-  int port;
-};
+Timezone TMZ(conf.std, conf.dlt);
 
 bool sound = true;
 int sound_interval = 0;
 
 uint8_t displaySelector = 0;
-Config conf;
-
-void loadConfiguration(Config& config) {
-  File file = SPIFFS.open(path_to_conf, "r");
-  JsonDocument doc;
-
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-    Serial.println(F("Failed to read file, using default configuration"));
-
-  config.port = doc["port"] | 2731;
-  strlcpy(config.hostname,                  // <- destination
-          doc["hostname"] | "example.com",  // <- source
-          sizeof(config.hostname));         // <- destination's capacity
-
-  file.close();
-}
 
 void setup()
 {
   Serial.begin(115200);
 
   if(!SPIFFS.begin()){
-    Serial.println("Failed to mount SPIFFS.\n");
+    Serial.printf("%s\n", SPIFFS_ERR);
     return;
   }
-  Serial.println("SPIFFS mounted successfully.\n");
+  Serial.printf("%s\n", SPIFFS_SUC);
 
-  pinMode(buzzer, OUTPUT);
-  digitalWrite(buzzer, LOW);
+  loadConfiguration(conf);
 
-  //initialize button
-  screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(conf.pins.BUZZER_PIN, OUTPUT);
+  digitalWrite(conf.pins.BUZZER_PIN, LOW);
+
+  screen_button.attach(conf.pins.BUTTON_PIN, INPUT_PULLUP);
   screen_button.interval(5);
   screen_button.setPressedState(LOW);
 
   if(!matrix.begin(9)) {
-    Serial.printf("Could not find MAX7219! Check wiring!\n");
+    Serial.printf("%s %s\n", MAX7219_ERR, WIRE_ERR);
     while(true);
   }
 
   if (!rtc.begin(&Wire)) {
-    Serial.printf("Could not find DS3231 RTC! Check wiring!\n");
+    Serial.printf("%s %s\n", DS3231_ERR, WIRE_ERR);
     while(true);
   }
 
-  if (!bme.begin(BME280_ADDR, &Wire)) {
-    Serial.println("Could not find BME280 sensor! Check wiring!\n");
+  if (!bme.begin(conf.i2c.BME_280, &Wire)) {
+    Serial.printf("%s %s\n", BME280_ERR, WIRE_ERR);
     while(true);
   }
 
-  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, BH1750_ADDR, &Wire)) {
-    Serial.println("Could not find BH1750 sensor! Check wiring!\n");
+  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, conf.i2c.BH1750, &Wire)) {
+    Serial.printf("%s %s\n", BH1750_ERR, WIRE_ERR);
     while(true);
   }
 
   if (rtc.lostPower()) {
-    // if the RTC lost power, set the time trying to sync with NTP server
-    Serial.printf("RTC lost power. Press the button for trying to set the time.\n");
+    Serial.printf("%s\n", RTC_POWER_LOST);
 
     matrix.setZone(7, 4, 7);
     matrix.setZone(8, 0, 3);
@@ -151,15 +114,11 @@ void setup()
   }
 
   //setting up zones of the matrix display
-
-  // upper screen for HH:MM and SS
   matrix.setZone(0, 7, 7);
   matrix.setZone(1, 4, 6);
 
-  // lower screen for temperature
   matrix.setZone(2, 0, 3);
 
-  // flip the upper screen
   matrix.setZoneEffect(0, 1, PA_FLIP_UD);
   matrix.setZoneEffect(0, 1, PA_FLIP_LR);
   matrix.setZoneEffect(1, 1, PA_FLIP_UD);
@@ -169,24 +128,18 @@ void setup()
   matrix.setFont(1, pixel_font);
   matrix.setFont(2, pixel_font);
 
-  // upper screen for DDD DD
   matrix.setZone(3, 4, 7);
-  // lower screen for MMM YYYY
   matrix.setZone(4, 0, 3);
 
-  // flip the upper screen
   matrix.setZoneEffect(3, 1, PA_FLIP_UD);
   matrix.setZoneEffect(3, 1, PA_FLIP_LR);
 
   matrix.setFont(3, small_font);
   matrix.setFont(4, small_font);
 
-  // upper screen for humidity
   matrix.setZone(5, 4, 7);
-  // lower screen for pressure
   matrix.setZone(6, 0, 3);
 
-  // flip the upper screen
   matrix.setZoneEffect(5, 1, PA_FLIP_UD);
   matrix.setZoneEffect(5, 1, PA_FLIP_LR);
 
@@ -218,7 +171,7 @@ void loop()
   * and turned on again when the button is pressed again
   */
 
-  current_time = localTimezone->toLocal((rtc.now()).unixtime());
+  current_time = TMZ.toLocal((rtc.now()).unixtime());
 
   screen_button.update();
   if (screen_button.released())

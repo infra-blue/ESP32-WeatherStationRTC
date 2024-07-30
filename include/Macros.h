@@ -1,20 +1,14 @@
-#ifndef BME280_ADDR
-#define BME280_ADDR 0x76
-#endif
+#define WIRE_ERR "Check wiring!"
 
-#ifndef BH1750_ADDR
-#define BH1750_ADDR 0x23
-#endif
+#define MAX7219_ERR "Could not find MAX7219!"
+#define DS3231_ERR "Could not find DS3231 RTC!"
+#define BME280_ERR "Could not find BME280 sensor!"
+#define BH1750_ERR "Could not find BH1750 sensor!"
 
-#ifndef DS3231_ADDR
-#define DS3231_ADDR 0x68
-#endif
+#define RTC_POWER_LOST "RTC lost power. Press the button for trying to set the time."
 
-#define BUTTON_PIN 0
-#define BUZZER_PIN 14
+#define SPIFFS_ERR "Failed to mount SPIFFS."
+#define SPIFFS_SUC "SPIFFS mounted successfully."
 
-#define CLK_PIN   18
-#define DATA_PIN  23
-#define CS_PIN    5
-
-#define MAX_DEVICES 8
+#define MAX7219_DEVICES 8
+#define HW_TYPE MD_MAX72XX::FC16_HW

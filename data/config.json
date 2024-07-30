@@ -1,11 +1,20 @@
 {
-    "TIMECHANGERULE": {
-        "abbrev": "string",
+    "STD_TIME": {
+        "abbrev": "CET",
         "week": 0,
-        "dow": 0,
-        "month": 0,
-        "hour": 0,
-        "offset": 0
+        "dow": 1,
+        "month": 10,
+        "hour": 3,
+        "offset": 60
+    },
+
+    "DL_TIME": {
+        "abbrev": "CEST",
+        "week": 0,
+        "dow": 1,
+        "month": 3,
+        "hour": 2,
+        "offset": 120
     },
 
     "I2C_ADDR": {
@@ -27,9 +36,11 @@
 
     "NTP_SERVER": "time.inrim.it",
 
-    "LANGUAGE": "en",
+    "LANGUAGE": "it",
 
     "BUZZ_SOUND": true,
+
+    "FAHRENHEIT": false,
 
     "WIFI": {
         "SSID": "",

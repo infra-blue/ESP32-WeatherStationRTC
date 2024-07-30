@@ -5,6 +5,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
+#include <Languages.h>
+
 #include "Screens.h"
 
 void print_time_temp() {

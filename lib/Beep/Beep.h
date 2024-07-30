@@ -1,7 +1,7 @@
 #ifndef BEEP_H
 #define BEEP_H
 
-extern uint8_t buzzer;
+extern Config conf;
 
 void beep_sound();
 
