@@ -11,7 +11,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: PlatformIO Run
-        uses: infra-blue/platformio-run-action@v1.0.3
+        uses: karniv00l/platformio-run-action@v1.1.2
         with:
           environments: "esp32dev"
           project-conf: "./platformio.ini"
