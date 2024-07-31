@@ -20,7 +20,7 @@ jobs:
           silent: false
           verbose: true
           disable-auto-clean: false
-      - name: Zip
+      - name: Generate zip
         if: startsWith(github.ref, 'refs/tags/')
         run: zip -r pio_build.zip .pio/build
       - name: Release
