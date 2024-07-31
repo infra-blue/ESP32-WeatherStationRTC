@@ -9,7 +9,6 @@ void set_NTP_time() {
   /**
    * @brief SET NTP TIME
    * tries to sync the RTC time with NTP server
-   * if it finds an open WiFi AP
    */
 
   WiFiUDP ntpUDP;
