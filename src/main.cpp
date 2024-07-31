@@ -36,16 +36,13 @@ MD_Parola* matrix = nullptr;
 RTC_DS3231 rtc;
 Adafruit_BME280 bme;
 BH1750 light_sensor;
-
 Bounce2::Button screen_button = Bounce2::Button();
 
 DateTime current_time;
-
 Timezone *TMZ = nullptr;
 
 bool tic = true;
 int sound_interval = 0;
-
 uint8_t displaySelector = 0;
 
 void setup()
@@ -114,7 +111,6 @@ void setup()
 
   matrix->setZone(0, 7, 7);
   matrix->setZone(1, 4, 6);
-
   matrix->setZone(2, 0, 3);
 
   matrix->setZoneEffect(0, 1, PA_FLIP_UD);
