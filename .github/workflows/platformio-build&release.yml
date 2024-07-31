@@ -1,0 +1,34 @@
+name: PlatformIO Build and Release
+
+on:
+  - pull_request
+  - push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: PlatformIO Build
+        uses: karniv00l/platformio-run-action@v1.1.2
+        with:
+          environments: "esp32dev"
+          targets: "size,buildfs"
+          project-conf: "./platformio.ini"
+          jobs: 6
+          silent: false
+          verbose: true
+          disable-auto-clean: false
+      - name: Zip
+        if: startsWith(github.ref, 'refs/tags/')
+        run: zip -r pio_build.zip .pio/build
+      - name: Release
+        uses: softprops/action-gh-release@v2.0.8
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          make_latest: "true"
+          files: |
+            pio_build.zip
+            LICENSE

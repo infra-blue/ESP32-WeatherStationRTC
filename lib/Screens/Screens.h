@@ -7,13 +7,19 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 
-extern MD_Parola matrix;
+#include <unordered_map>
+#include <vector>
+#include <string>
+
+#include <Languages.h>
+#include <Config_Parser.h>
+
+extern MD_Parola* matrix;
 extern RTC_DS3231 rtc;
 extern Adafruit_BME280 bme;
 extern DateTime current_time;
 
-extern char days[7][4];
-extern char months[12][4];
+extern Config conf;
 
 enum screen{
   CLOCK_TEMP,

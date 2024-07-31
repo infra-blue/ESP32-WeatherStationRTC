@@ -14,5 +14,5 @@ void set_intensity() {
   * mapped from to 0 to 15 (max level limited to 300 for more sensitivity)
   */
   if(light_sensor.measurementReady())
-    matrix.setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
+    matrix->setIntensity(map(constrain(round(light_sensor.readLightLevel()), 0, 300), 0, 300, 0, 15));
 }

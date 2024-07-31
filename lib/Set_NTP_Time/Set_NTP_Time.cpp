@@ -12,8 +12,10 @@ void set_NTP_time() {
    * if it finds an open WiFi AP
    */
 
+  WiFiUDP ntpUDP;
+  NTPClient timeClient(ntpUDP, conf.ntpServer);
+
   WiFi.mode(WIFI_STA);
-  //scan for open WiFi AP
   uint8_t n_net = WiFi.scanNetworks();
   bool open_ap_found = false;
   char ssid[256];

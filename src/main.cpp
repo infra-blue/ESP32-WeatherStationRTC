@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <FS.h>
+#include <SPIFFS.h>
 #include <Adafruit_I2CDevice.h>
 #include <SPI.h>
 #include <RTClib.h>
@@ -12,35 +14,36 @@
 #include <Adafruit_BME280.h>
 #include <BH1750.h>
 #include <Bounce2.h>
+#include <ArduinoJson.h>
 
-#include <Ntp_Servers.h>
+#include <unordered_map>
+#include <vector>
+#include <string>
+
 #include <Macros.h>
-#include <TimeZoneConf.h>
 
+#include <Config_Parser.h>
+#include <Languages.h>
 #include <Font_Data.h>
 #include <Screens.h>
 #include <Set_NTP_Time.h>
 #include <Set_Intensity.h>
 #include <Beep.h>
 
-MD_Parola matrix = MD_Parola(MD_MAX72XX::FC16_HW, DATA_PIN, CLK_PIN, CS_PIN, MAX_DEVICES);
+Config conf;
+
+MD_Parola* matrix = nullptr;
 RTC_DS3231 rtc;
 Adafruit_BME280 bme;
 BH1750 light_sensor;
 
 Bounce2::Button screen_button = Bounce2::Button();
-uint8_t buzzer = BUZZER_PIN;
-
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, INRIM);
 
 DateTime current_time;
 
-//days and months
-char days[7][4] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
-char months[12][4] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+Timezone *TMZ = nullptr;
 
-bool sound = true;
+bool tic = true;
 int sound_interval = 0;
 
 uint8_t displaySelector = 0;
@@ -48,50 +51,59 @@ uint8_t displaySelector = 0;
 void setup()
 {
   Serial.begin(115200);
-  pinMode(buzzer, OUTPUT);
-  digitalWrite(buzzer, LOW);
 
-  //initialize button
-  screen_button.attach(BUTTON_PIN, INPUT_PULLUP);
+  if(!SPIFFS.begin()){
+    Serial.printf("%s\n", SPIFFS_ERR);
+    return;
+  }
+  Serial.printf("%s\n", SPIFFS_SUC);
+
+  loadConfiguration(conf);
+
+  TMZ = new Timezone(conf.std, conf.dlt);
+  matrix = new MD_Parola(HW_TYPE, conf.max7219.DATA_PIN, conf.max7219.CLK_PIN, conf.max7219.CS_PIN, MAX7219_DEVICES);
+
+  pinMode(conf.pins.BUZZER_PIN, OUTPUT);
+  digitalWrite(conf.pins.BUZZER_PIN, LOW);
+
+  screen_button.attach(conf.pins.BUTTON_PIN, INPUT_PULLUP);
   screen_button.interval(5);
   screen_button.setPressedState(LOW);
 
-  if(!matrix.begin(9)) {
-    Serial.printf("Could not find MAX7219! Check wiring!\n");
+  if(!matrix->begin(9)) {
+    Serial.printf("%s %s\n", MAX7219_ERR, WIRE_ERR);
     while(true);
   }
 
   if (!rtc.begin(&Wire)) {
-    Serial.printf("Could not find DS3231 RTC! Check wiring!\n");
+    Serial.printf("%s %s\n", DS3231_ERR, WIRE_ERR);
     while(true);
   }
 
-  if (!bme.begin(BME280_ADDR, &Wire)) {
-    Serial.println("Could not find BME280 sensor! Check wiring!\n");
+  if (!bme.begin(conf.i2c.BME_280, &Wire)) {
+    Serial.printf("%s %s\n", BME280_ERR, WIRE_ERR);
     while(true);
   }
 
-  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, BH1750_ADDR, &Wire)) {
-    Serial.println("Could not find BH1750 sensor! Check wiring!\n");
+  if(!light_sensor.begin(BH1750::CONTINUOUS_HIGH_RES_MODE, conf.i2c.BH1750, &Wire)) {
+    Serial.printf("%s %s\n", BH1750_ERR, WIRE_ERR);
     while(true);
   }
 
   if (rtc.lostPower()) {
-    // if the RTC lost power, set the time trying to sync with NTP server
-    Serial.printf("RTC lost power. Press the button for trying to set the time.\n");
+    Serial.printf("%s\n", RTC_POWER_LOST);
 
-    matrix.setZone(7, 4, 7);
-    matrix.setZone(8, 0, 3);
-    matrix.setFont(7, small_font);
-    matrix.setFont(8, small_font);
-    matrix.setZoneEffect(7, 1, PA_FLIP_UD);
-    matrix.setZoneEffect(7, 1, PA_FLIP_LR);
-    matrix.displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
-    matrix.displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
-    matrix.synchZoneStart();
-    matrix.displayAnimate();
+    matrix->setZone(7, 4, 7);
+    matrix->setZone(8, 0, 3);
+    matrix->setFont(7, small_font);
+    matrix->setFont(8, small_font);
+    matrix->setZoneEffect(7, 1, PA_FLIP_UD);
+    matrix->setZoneEffect(7, 1, PA_FLIP_LR);
+    matrix->displayZoneText(7, "POWER", PA_CENTER, 75, 10, PA_PRINT);
+    matrix->displayZoneText(8, "LOST", PA_CENTER, 75, 10, PA_PRINT);
+    matrix->synchZoneStart();
+    matrix->displayAnimate();
 
-    //wait for button press
     while(!screen_button.pressed())
       screen_button.update();
 
@@ -100,50 +112,39 @@ void setup()
     set_NTP_time();
   }
 
-  //setting up zones of the matrix display
+  matrix->setZone(0, 7, 7);
+  matrix->setZone(1, 4, 6);
 
-  // upper screen for HH:MM and SS
-  matrix.setZone(0, 7, 7);
-  matrix.setZone(1, 4, 6);
+  matrix->setZone(2, 0, 3);
 
-  // lower screen for temperature
-  matrix.setZone(2, 0, 3);
+  matrix->setZoneEffect(0, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(0, 1, PA_FLIP_LR);
+  matrix->setZoneEffect(1, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(1, 1, PA_FLIP_LR);
 
-  // flip the upper screen
-  matrix.setZoneEffect(0, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(0, 1, PA_FLIP_LR);
-  matrix.setZoneEffect(1, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(1, 1, PA_FLIP_LR);
+  matrix->setFont(0, small_font);
+  matrix->setFont(1, pixel_font);
+  matrix->setFont(2, pixel_font);
 
-  matrix.setFont(0, small_font);
-  matrix.setFont(1, pixel_font);
-  matrix.setFont(2, pixel_font);
+  matrix->setZone(3, 4, 7);
+  matrix->setZone(4, 0, 3);
 
-  // upper screen for DDD DD
-  matrix.setZone(3, 4, 7);
-  // lower screen for MMM YYYY
-  matrix.setZone(4, 0, 3);
+  matrix->setZoneEffect(3, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(3, 1, PA_FLIP_LR);
 
-  // flip the upper screen
-  matrix.setZoneEffect(3, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(3, 1, PA_FLIP_LR);
+  matrix->setFont(3, small_font);
+  matrix->setFont(4, small_font);
 
-  matrix.setFont(3, small_font);
-  matrix.setFont(4, small_font);
+  matrix->setZone(5, 4, 7);
+  matrix->setZone(6, 0, 3);
 
-  // upper screen for humidity
-  matrix.setZone(5, 4, 7);
-  // lower screen for pressure
-  matrix.setZone(6, 0, 3);
+  matrix->setZoneEffect(5, 1, PA_FLIP_UD);
+  matrix->setZoneEffect(5, 1, PA_FLIP_LR);
 
-  // flip the upper screen
-  matrix.setZoneEffect(5, 1, PA_FLIP_UD);
-  matrix.setZoneEffect(5, 1, PA_FLIP_LR);
+  matrix->setFont(5, pixel_font);
+  matrix->setFont(6, pixel_font);
 
-  matrix.setFont(5, pixel_font);
-  matrix.setFont(6, pixel_font);
-
-  matrix.displayClear();
+  matrix->displayClear();
 
   bme.setSampling(Adafruit_BME280::MODE_NORMAL,
                   Adafruit_BME280::SAMPLING_X1,
@@ -152,6 +153,8 @@ void setup()
                   Adafruit_BME280::FILTER_OFF,
                   Adafruit_BME280::STANDBY_MS_1000
                   );
+
+  printConfiguration(conf);
 }
 
 void loop()
@@ -168,7 +171,7 @@ void loop()
   * and turned on again when the button is pressed again
   */
 
-  current_time = localTimezone->toLocal((rtc.now()).unixtime());
+  current_time = TMZ->toLocal((rtc.now()).unixtime());
 
   screen_button.update();
   if (screen_button.released())
@@ -187,7 +190,7 @@ void loop()
   }
 
   if(screen_button.isPressed() && screen_button.currentDuration() > 500) {
-    matrix.displayShutdown(true);
+    matrix->displayShutdown(true);
 
     while(!screen_button.pressed())
       screen_button.update();
@@ -195,17 +198,19 @@ void loop()
     while(!screen_button.released())
       screen_button.update();
 
-    matrix.displayShutdown(false);
+    matrix->displayShutdown(false);
   }
 
-  if(current_time.second() == 0 && current_time.minute() == 0 && sound) {
-    beep_sound();
-    sound = false;
-    sound_interval = millis();
-  }
+  if(conf.buzzSound){
+    if(current_time.second() == 0 && current_time.minute() == 0 && tic) {
+      beep_sound();
+      tic = false;
+      sound_interval = millis();
+    }
 
-  if(!sound && (millis() - sound_interval) > 1000)
-    sound = true;
+    if(!tic && (millis() - sound_interval) > 1000)
+      tic = true;
+  }
 
   set_intensity();
 }

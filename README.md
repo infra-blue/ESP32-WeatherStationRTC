@@ -76,10 +76,9 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 **Software Setup:**
    - Install the PlatformIO IDE (or the VSCode extension).
    - Connect the board to your computer.
-   - Update the pin definitions and the NTP servers if needed.
-   - Change the I2C addresses if needed.
-   - Change the timezone if needed.
-   - Compile and upload the code to your ESP32 board.
+   - Change the configuration in data/config.json.
+   - Build the filesystem and upload it.
+   - Compile and upload the firmware to your ESP32 board.
 
 ## First boot
 At the first boot the display shows "POWER LOST" and if you push the button it tries to connect to the first open AP it finds to sync the RTC with an NTP server.
