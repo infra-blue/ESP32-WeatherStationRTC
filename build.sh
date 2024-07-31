@@ -2,7 +2,7 @@
 
 pio run --target size
 if [ $? -ne 0 ]; then
-    echo "Error executing 'pio run --size'."
+    echo "Error executing 'pio run --target size'."
     exit 1
 fi
 

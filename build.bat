@@ -2,7 +2,7 @@
 
 pio run --target size
 if %errorlevel% neq 0 (
-    echo "Error executing 'pio run --size'."
+    echo "Error executing 'pio run --target size'."
     exit /b %errorlevel%
 )
 
