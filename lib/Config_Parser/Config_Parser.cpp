@@ -6,7 +6,7 @@
 #define PATH_TO_CONF "/config.json"
 
 void loadConfiguration(Config& config) {
-  File file = SPIFFS.open(PATH_TO_CONF, "r");
+  File file = SPIFFS.open(PATH_TO_CONF, FILE_READ);
   JsonDocument conf;
 
   DeserializationError error = deserializeJson(conf, file);
@@ -63,6 +63,57 @@ void loadConfiguration(Config& config) {
   strlcpy(config.wifi.PASSWORD,
           conf["WIFI"]["PASSWORD"] | "",
           sizeof(config.wifi.PASSWORD));
+
+  file.close();
+}
+
+void storeConfiguration(Config config) {
+  SPIFFS.remove(PATH_TO_CONF);
+
+  File file = SPIFFS.open(PATH_TO_CONF, FILE_WRITE);
+  if (!file) {
+    Serial.println(F("Failed to create file"));
+    return;
+  }
+
+  JsonDocument conf;
+
+  conf["STD_TIME"]["abbrev"] = config.std.abbrev;
+  conf["STD_TIME"]["week"] = config.std.week;
+  conf["STD_TIME"]["dow"] = config.std.dow;
+  conf["STD_TIME"]["month"] = config.std.month;
+  conf["STD_TIME"]["hour"] = config.std.hour;
+  conf["STD_TIME"]["offset"] = config.std.offset;
+
+  conf["DL_TIME"]["abbrev"] = config.dlt.abbrev;
+  conf["DL_TIME"]["week"] = config.dlt.week;
+  conf["DL_TIME"]["dow"] = config.dlt.dow;
+  conf["DL_TIME"]["month"] = config.dlt.month;
+  conf["DL_TIME"]["hour"] = config.dlt.hour;
+  conf["DL_TIME"]["offset"] = config.dlt.offset;
+
+  conf["I2C_ADDR"]["BME_280"] = config.i2c.BME_280;
+  conf["I2C_ADDR"]["BH1750"] = config.i2c.BH1750;
+  conf["I2C_ADDR"]["DS3231"] = config.i2c.DS3231;
+
+  conf["MAX7219_PINS"]["CLK_PIN"] = config.max7219.CLK_PIN;
+  conf["MAX7219_PINS"]["DATA_PIN"] = config.max7219.DATA_PIN;
+  conf["MAX7219_PINS"]["CS_PIN"] = config.max7219.CS_PIN;
+
+  conf["PINS"]["BUTTON_PIN"] = config.pins.BUTTON_PIN;
+  conf["PINS"]["BUZZER_PIN"] = config.pins.BUZZER_PIN;
+
+  conf["NTP_SERVER"] = config.ntpServer;
+  conf["LANGUAGE"] = config.language;
+  conf["BUZZ_SOUND"] = config.buzzSound;
+  conf["FAHRENHEIT"] = config.fahrenheit;
+
+  conf["WIFI"]["SSID"] = config.wifi.SSID;
+  conf["WIFI"]["PASSWORD"] = config.wifi.PASSWORD;
+
+  if (serializeJson(conf, file) == 0) {
+    Serial.println(F("Failed to write to file"));
+  }
 
   file.close();
 }

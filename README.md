@@ -32,7 +32,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 **Software Setup:**
    - Install the PlatformIO IDE or PlatformIO CLI (or the VSCode extension, make sure to add ".platformio\penv\Scripts" in your path).
    - Connect the board to your computer.
-   - Change the configuration in data/config.json.dist and rename it in config.json.
+   - Change the configuration in ```data/config.json```.
    - Build the filesystem and upload it, compile and upload the firmware to your ESP32 board (you can even run the build script instead of doing it manually).
 
 **Hardware Setup:**
