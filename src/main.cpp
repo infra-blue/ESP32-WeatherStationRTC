@@ -193,7 +193,6 @@ void loop()
   server.handleClient();
 
   screen_button.update();
-
   if (screen_button.released())
     ++displaySelector %= 3;
 
@@ -215,8 +214,6 @@ void loop()
     while(!screen_button.released())
       screen_button.update();
   }
-
-  screen_button.update();
 
   if(screen_button.pressed() && screen_off) {
     matrix->displayShutdown(false);
