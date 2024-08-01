@@ -1,10 +1,10 @@
 # ESP32-WeatherStationRTC
 
 <div align="center">
-  <img src="assets/image.gif" alt="Weather Station">
+  <img src="assets/clock.gif" alt="Weather Station">
 </div>
 
-This project is an ESP32-based desk clock with functionality of monitoring the temperature, atmospheric pressure and humidity in the air. It is coded using the arduino framework.
+This project is an ESP32-based desk clock with functionality of monitoring the temperature, atmospheric pressure and humidity in the air. The display is auto dimmed. It is coded using the arduino framework.
 
 ## Features
 
