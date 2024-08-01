@@ -1,6 +1,8 @@
 # ESP32-WeatherStationRTC
 
-![Weather Station](assets/image.gif)
+<div align="center">
+  <img src="assets/image.gif" alt="Weather Station">
+</div>
 
 This project is an ESP32-based desk clock with functionality of monitoring the temperature, atmospheric pressure and humidity in the air. It is coded using the arduino framework.
 
@@ -14,7 +16,11 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 - **Button Control:** A button allows cycling through the display modes and turning the display on/off with a long press.
 - **Web Server**: A web server for change the clock settings.
 
+<div align="center">
+
 ## Hardware Requirements
+
+</div>
 
 - **ESP32** (other arduino compatible boards are okay, just change the pins)
 - **MAX7219** LED matrix module (8 devices needed)
@@ -24,19 +30,32 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 - **Passive Buzzer**
 - **(OPTIONAL) PushButton** (the default button is the BOOT button in the ESP32-DevKitC V4 devboard)
 
+<div align="center">
+
 ## Software Requirements
+
+</div>
 
 - **PlatformIO**
 - **Python3**
 ## Setup
 
-**Software Setup:**
+<div align="center">
+
+### **Software Setup:**
+
+</div>
+
    - Install the PlatformIO IDE or PlatformIO CLI (or the VSCode extension, make sure to add ".platformio\penv\Scripts" in your path).
    - Connect the board to your computer.
    - Change the configuration in ```data/config.json```.
    - Build the filesystem and upload it, compile and upload the firmware to your ESP32 board (you can even run the build script instead of doing it manually).
+<div align="center">
 
-**Hardware Setup:**
+### **Hardware Setup:**
+
+</div>
+
    - The reference board is an ESP32-DevKitC V4
 
 | PushButton | ESP32-DevKitC V4 |
@@ -103,7 +122,22 @@ You can reach the web server conneting to
 - PASSWORD: ```SuP3r_S3cr3t_P@ssw0rd!``` 
 
 at the ```10.10.10.10``` IP address.
-# ![WebServer](assets/ESP32-Settings.jpg)
+
+<div align="center">
+
+### Home page
+
+# ![Home](assets/home.png)
+
+</div>
+
+<div align="center">
+
+### Settings page
+
+</div>
+
+# ![Settings](assets/settings.png)
 
 ## License
 

@@ -68,7 +68,8 @@ void setup() {
   IPAddress subnet(SUBNET);
   WiFi.softAPConfig(local_IP, gateway, subnet);
 
-  server.on("/", handleRoot);
+  server.on("/", handleHome);
+  server.on("/settings", handleSettings);
   server.on("/updateTime", HTTP_POST, handleUpdateTime);
   server.on("/toggleScreen", HTTP_POST, handleToggleScreen);
   server.on("/submitNetwork", HTTP_POST, handleNetworkSubmit);
@@ -164,11 +165,11 @@ void setup() {
   matrix->displayClear();
 
   bme.setSampling(Adafruit_BME280::MODE_NORMAL,
-                  Adafruit_BME280::SAMPLING_X16,
-                  Adafruit_BME280::SAMPLING_X16,
-                  Adafruit_BME280::SAMPLING_X16,
+                  Adafruit_BME280::SAMPLING_X1,
+                  Adafruit_BME280::SAMPLING_X1,
+                  Adafruit_BME280::SAMPLING_X1,
                   Adafruit_BME280::FILTER_OFF,
-                  Adafruit_BME280::STANDBY_MS_0_5
+                  Adafruit_BME280::STANDBY_MS_1000
                   );
 
   printConfiguration(conf);
