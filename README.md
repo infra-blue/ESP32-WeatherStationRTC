@@ -87,7 +87,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 | CS | 5 |
 
 **N.B.** The two 4 devices displays needs to be connected like this:
-![Display schematic](assets/schematic_display.png)
+# ![Display schematic](assets/schematic_display.png)
 
 ## Settings
 
@@ -117,7 +117,7 @@ At the first boot the display shows "POWER LOST" and if you push the button it t
 - Hold the button for more than 500ms set the ESP32 in powersave mode. Press again to turn it back on.
 
 ## WebServer
-You can reach the web server conneting to
+You can reach the web server connecting to
 - SSID:```ESP32WeatherStation```
 - PASSWORD: ```SuP3r_S3cr3t_P@ssw0rd!``` 
 
