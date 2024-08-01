@@ -95,7 +95,7 @@ At the first boot the display shows "POWER LOST" and if you push the button it t
     - time & temperature (in Celsius)
     - date (DDD DD MMM YYYY)
     - humidity & pressure (in hPa)
-- Hold the button for more than 500ms to turn off the display. Press again to turn it back on.
+- Hold the button for more than 500ms set the ESP32 in powersave mode. Press again to turn it back on.
 
 ## WebServer
 You can reach the web server conneting to
