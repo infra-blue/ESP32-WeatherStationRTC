@@ -87,7 +87,12 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 | CS | 5 |
 
 **N.B.** The two 4 devices displays needs to be connected like this:
+
+<div align="center">
+
 # ![Display schematic](assets/schematic_display.png)
+
+</div>
 
 ## Settings
 
@@ -135,9 +140,9 @@ at the ```10.10.10.10``` IP address.
 
 ### Settings page
 
-</div>
-
 # ![Settings](assets/settings.png)
+
+</div>
 
 ## License
 
