@@ -25,6 +25,7 @@
 #include <Macros.h>
 
 #include <Config_Parser.h>
+#include <WebSettings.h>
 #include <Languages.h>
 #include <Font_Data.h>
 #include <Screens.h>
@@ -42,67 +43,17 @@ BH1750 light_sensor;
 Bounce2::Button screen_button = Bounce2::Button();
 
 DateTime current_time;
-Timezone *TMZ = nullptr;
+Timezone* TMZ = nullptr;
 
 bool tic = true;
 int sound_interval = 0;
 bool screen_off = false;
 uint8_t displaySelector = 0;
 
-const char HTML_PAGE[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML>
-<html>
-<head>
-  <title>Configurazione ESP32</title>
-</head>
-<body>
-  <h1>Configurazione ESP32</h1>
-  <form action="/submit" method="post">
-    <label for="ssid">SSID:</label>
-    <input type="text" id="ssid" name="ssid"><br>
-    <label for="password">Password:</label>
-    <input type="text" id="password" name="password"><br>
-    <label for="ntpServer">NTP Server:</label>
-    <input type="text" id="ntpServer" name="ntpServer"><br>
-    <label for="language">Language:</label>
-    <input type="text" id="language" name="language"><br>
-    <label for="buzzSound">Buzz Sound:</label>
-    <input type="checkbox" id="buzzSound" name="buzzSound"><br>
-    <label for="fahrenheit">Fahrenheit:</label>
-    <input type="checkbox" id="fahrenheit" name="fahrenheit"><br>
-    <input type="submit" value="Submit">
-  </form>
-</body>
-</html>
-)rawliteral";
-
-void handleRoot() {
-    server.send(200, "text/html", HTML_PAGE);
-}
-
-void handleFormSubmit() {
-    if (server.method() == HTTP_POST) {
-
-        strncpy(conf.wifi.SSID, server.arg("ssid").c_str(), sizeof(conf.wifi.SSID));
-        strncpy(conf.wifi.PASSWORD, server.arg("password").c_str(), sizeof(conf.wifi.PASSWORD));
-        strncpy(conf.ntpServer, server.arg("ntpServer").c_str(), sizeof(conf.ntpServer));
-        strncpy(conf.language, server.arg("language").c_str(), sizeof(conf.language));
-        conf.buzzSound = server.hasArg("buzzSound");
-        conf.fahrenheit = server.hasArg("fahrenheit");
-
-        storeConfiguration(conf);
-
-        server.send(200, "text/html", "<html><body><h1>Configuration Saved!</h1></body></html>");
-    } else {
-        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
-    }
-}
-
-void setup()
-{
+void setup() {
   Serial.begin(115200);
 
-  if(!SPIFFS.begin()){
+  if (!SPIFFS.begin()) {
     Serial.printf("%s\n", SPIFFS_ERR);
     return;
   }
@@ -111,14 +62,20 @@ void setup()
   loadConfiguration(conf);
 
   WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(AP_NAME);
+  WiFi.softAP(AP_NAME, AP_PASSWORD);
   IPAddress local_IP(IP_ADDRESS);
   IPAddress gateway(GATEWAY);
   IPAddress subnet(SUBNET);
   WiFi.softAPConfig(local_IP, gateway, subnet);
 
   server.on("/", handleRoot);
-  server.on("/submit", HTTP_POST, handleFormSubmit);
+  server.on("/updateTime", HTTP_POST, handleUpdateTime);
+  server.on("/toggleScreen", HTTP_POST, handleToggleScreen);
+  server.on("/submitNetwork", HTTP_POST, handleNetworkSubmit);
+  server.on("/submitNTP", HTTP_POST, handleNTPSubmit);
+  server.on("/submitLanguage", HTTP_POST, handleLanguageSubmit);
+  server.on("/submitTimezone", HTTP_POST, handleTimezoneSubmit);
+  server.on("/submitAdditional", HTTP_POST, handleAdditionalSubmit);
   server.begin();
 
   TMZ = new Timezone(conf.std, conf.dlt);
@@ -211,7 +168,7 @@ void setup()
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::FILTER_OFF,
-                  Adafruit_BME280::STANDBY_MS_1000
+                  Adafruit_BME280::STANDBY_MS_0_5
                   );
 
   printConfiguration(conf);

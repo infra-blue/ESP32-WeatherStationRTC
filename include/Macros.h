@@ -14,7 +14,8 @@
 #define HW_TYPE MD_MAX72XX::FC16_HW
 
 #define AP_NAME "ESP32WeatherStation"
+#define AP_PASSWORD "SuP3r_S3cr3t_P@ssw0rd!"
 
-#define IP_ADDRESS 192, 168, 1, 1
-#define GATEWAY 192, 168, 1, 1
+#define IP_ADDRESS 10, 10, 10, 10
+#define GATEWAY 10, 10, 10, 10
 #define SUBNET 255, 255, 255, 0

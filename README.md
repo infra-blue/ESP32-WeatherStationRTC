@@ -12,6 +12,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 - **Automatic Brightness Adjustment:** Adjusts the LED matrix display brightness based on the ambient light level detected by the BH1750 sensor.
 - **WiFi Time Sync:** In case the RTC loses power, the device attempts to sync the time via an NTP server over WiFi.
 - **Button Control:** A button allows cycling through the display modes and turning the display on/off with a long press.
+- **Web Server**: A web server for change the clock settings.
 
 ## Hardware Requirements
 
@@ -69,16 +70,23 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 **N.B.** The two 4 devices displays needs to be connected like this:
 ![Display schematic](assets/schematic_display.png)
 
+## Settings
+
+- **WiFi**: you can set your network ssid and password or leave it blank (the clock tries to connect to the first open AP it finds). You can only set the ssid for an open AP.
+
+- **Supported languages**: english, italian, spanish, german, french.
+
+- **Timezone**: Timezone.h TimeChangerule format.
+
 ## First boot
 At the first boot the display shows "POWER LOST" and if you push the button it tries to connect to your wifi to sync the RTC with an NTP server.
 **So:**
-- Set up an AP (mobile hotspot is ok)
-- Set SSID and PASSWORD in config.json
-- Press the push button on the clock
-- Wait for it to connect to the server
-- Press the button again
+- Set up an AP (mobile hotspot is ok).
+- Press the push button on the clock.
+- Wait for it to connect to the server.
+- Press the button again.
 
-**IMPORTANT**: this procedure is necessary whenever the DS3231 loses power (i.e. when the battery runs out or one is not inserted and the ESP32 loses power) and this is the only way the clock is synced.
+**IMPORTANT**: this procedure is necessary whenever the DS3231 loses power (i.e. when the battery runs out or one is not inserted and the ESP32 loses power).
 
 ## Usage
 
@@ -88,6 +96,14 @@ At the first boot the display shows "POWER LOST" and if you push the button it t
     - date (DDD DD MMM YYYY)
     - humidity & pressure (in hPa)
 - Hold the button for more than 500ms to turn off the display. Press again to turn it back on.
+
+## WebServer
+You can reach the web server conneting to
+- SSID:```ESP32WeatherStation```
+- PASSWORD: ```SuP3r_S3cr3t_P@ssw0rd!``` 
+
+at the ```10.10.10.10``` IP address.
+# ![WebServer](assets/ESP32-Settings.jpg)
 
 ## License
 
