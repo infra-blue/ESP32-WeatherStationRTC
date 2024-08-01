@@ -146,7 +146,7 @@ void setup()
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
-                  Adafruit_BME280::FILTER_X16,
+                  Adafruit_BME280::FILTER_OFF,
                   Adafruit_BME280::STANDBY_MS_1000
                   );
 
