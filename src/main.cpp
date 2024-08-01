@@ -193,6 +193,7 @@ void loop()
   server.handleClient();
 
   screen_button.update();
+
   if (screen_button.released())
     ++displaySelector %= 3;
 
@@ -210,14 +211,18 @@ void loop()
 
   if(screen_button.isPressed() && screen_button.currentDuration() > 500) {
     matrix->displayShutdown(true);
-
-    while(!screen_button.pressed())
-      screen_button.update();
-
+    screen_off = true;
     while(!screen_button.released())
       screen_button.update();
+  }
 
+  screen_button.update();
+
+  if(screen_button.pressed() && screen_off) {
     matrix->displayShutdown(false);
+    screen_off = false;
+    while(!screen_button.released())
+      screen_button.update();
   }
 
   if(conf.buzzSound){

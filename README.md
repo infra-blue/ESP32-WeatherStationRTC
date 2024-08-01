@@ -10,7 +10,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 
 - **Time and date:** Utilizes the DS3231 RTC module for accurate timekeeping and displays the current time and date.
 - **Temperature, Humidity, and Pressure Measurement:** Uses the BME280 sensor to measure and display the current temperature, humidity, and pressure.
-- **Beep Sound**: every hour the buzzer beeps.
+- **Beep Sound**: Every hour the buzzer beeps.
 - **Automatic Brightness Adjustment:** Adjusts the LED matrix display brightness based on the ambient light level detected by the BH1750 sensor.
 - **WiFi Time Sync:** In case the RTC loses power, the device attempts to sync the time via an NTP server over WiFi.
 - **Button Control:** A button allows cycling through the display modes and turning the display on/off with a long press.
@@ -119,7 +119,7 @@ At the first boot the display shows "POWER LOST" and if you push the button it t
     - time & temperature (in Celsius)
     - date (DDD DD MMM YYYY)
     - humidity & pressure (in hPa)
-- Hold the button for more than 500ms set the ESP32 in powersave mode. Press again to turn it back on.
+- Hold the button for more than 500ms to turn off the display. Press again to turn it back on.
 
 ## WebServer
 You can reach the web server connecting to
