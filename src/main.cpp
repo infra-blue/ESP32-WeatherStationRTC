@@ -7,6 +7,8 @@
 #include <MD_MAX72xx.h>
 #include <MD_Parola.h>
 #include <WiFi.h>
+#include <WebServer.h>
+#include <IPAddress.h>
 #include <NTPClient.h>
 #include <Timezone.h>
 #include <Wire.h>
@@ -23,6 +25,7 @@
 #include <Macros.h>
 
 #include <Config_Parser.h>
+#include <WebSettings.h>
 #include <Languages.h>
 #include <Font_Data.h>
 #include <Screens.h>
@@ -31,6 +34,7 @@
 #include <Beep.h>
 
 Config conf;
+WebServer server(80);
 
 MD_Parola* matrix = nullptr;
 RTC_DS3231 rtc;
@@ -39,23 +43,40 @@ BH1750 light_sensor;
 Bounce2::Button screen_button = Bounce2::Button();
 
 DateTime current_time;
-Timezone *TMZ = nullptr;
+Timezone* TMZ = nullptr;
 
 bool tic = true;
 int sound_interval = 0;
+bool screen_off = false;
 uint8_t displaySelector = 0;
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
 
-  if(!SPIFFS.begin()){
+  if (!SPIFFS.begin()) {
     Serial.printf("%s\n", SPIFFS_ERR);
     return;
   }
   Serial.printf("%s\n", SPIFFS_SUC);
 
   loadConfiguration(conf);
+
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP(AP_NAME, AP_PASSWORD);
+  IPAddress local_IP(IP_ADDRESS);
+  IPAddress gateway(GATEWAY);
+  IPAddress subnet(SUBNET);
+  WiFi.softAPConfig(local_IP, gateway, subnet);
+
+  server.on("/", handleRoot);
+  server.on("/updateTime", HTTP_POST, handleUpdateTime);
+  server.on("/toggleScreen", HTTP_POST, handleToggleScreen);
+  server.on("/submitNetwork", HTTP_POST, handleNetworkSubmit);
+  server.on("/submitNTP", HTTP_POST, handleNTPSubmit);
+  server.on("/submitLanguage", HTTP_POST, handleLanguageSubmit);
+  server.on("/submitTimezone", HTTP_POST, handleTimezoneSubmit);
+  server.on("/submitAdditional", HTTP_POST, handleAdditionalSubmit);
+  server.begin();
 
   TMZ = new Timezone(conf.std, conf.dlt);
   matrix = new MD_Parola(HW_TYPE, conf.max7219.DATA_PIN, conf.max7219.CLK_PIN, conf.max7219.CS_PIN, MAX7219_DEVICES);
@@ -147,7 +168,7 @@ void setup()
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::FILTER_OFF,
-                  Adafruit_BME280::STANDBY_MS_1000
+                  Adafruit_BME280::STANDBY_MS_0_5
                   );
 
   printConfiguration(conf);
@@ -168,6 +189,7 @@ void loop()
   */
 
   current_time = TMZ->toLocal((rtc.now()).unixtime());
+  server.handleClient();
 
   screen_button.update();
   if (screen_button.released())
