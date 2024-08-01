@@ -8,6 +8,7 @@
 #include <MD_Parola.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <IPAddress.h>
 #include <NTPClient.h>
 #include <Timezone.h>
 #include <Wire.h>
@@ -45,39 +46,55 @@ Timezone *TMZ = nullptr;
 
 bool tic = true;
 int sound_interval = 0;
+bool screen_off = false;
 uint8_t displaySelector = 0;
 
+const char HTML_PAGE[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>Configurazione ESP32</title>
+</head>
+<body>
+  <h1>Configurazione ESP32</h1>
+  <form action="/submit" method="post">
+    <label for="ssid">SSID:</label>
+    <input type="text" id="ssid" name="ssid"><br>
+    <label for="password">Password:</label>
+    <input type="text" id="password" name="password"><br>
+    <label for="ntpServer">NTP Server:</label>
+    <input type="text" id="ntpServer" name="ntpServer"><br>
+    <label for="language">Language:</label>
+    <input type="text" id="language" name="language"><br>
+    <label for="buzzSound">Buzz Sound:</label>
+    <input type="checkbox" id="buzzSound" name="buzzSound"><br>
+    <label for="fahrenheit">Fahrenheit:</label>
+    <input type="checkbox" id="fahrenheit" name="fahrenheit"><br>
+    <input type="submit" value="Submit">
+  </form>
+</body>
+</html>
+)rawliteral";
+
 void handleRoot() {
-    String html = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Config ESP32</title></head><body>";
-    html += "<h1>Configurazione ESP32</h1>";
-    html += "<form action='/update' method='POST'>";
-    
-    // Form per i campi della struct Config
-    html += "SSID: <input type='text' name='SSID' value='" + String(conf.wifi.SSID) + "'><br>";
-    html += "Password: <input type='password' name='PASSWORD' value='" + String(conf.wifi.PASSWORD) + "'><br>";
-    // Aggiungi altri campi del form qui...
-    
-    html += "<input type='submit' value='Salva'>";
-    html += "</form>";
-    html += "</body></html>";
-    
-    server.send(200, "text/html", html);
+    server.send(200, "text/html", HTML_PAGE);
 }
 
-// Funzione per gestire l'aggiornamento della configurazione
-void handleUpdate() {
+void handleFormSubmit() {
     if (server.method() == HTTP_POST) {
-        // Aggiorna i valori della struct Config dai campi del form
-        strncpy(conf.wifi.SSID, server.arg("SSID").c_str(), sizeof(conf.wifi.SSID));
-        strncpy(conf.wifi.PASSWORD, server.arg("PASSWORD").c_str(), sizeof(conf.wifi.PASSWORD));
-        // Aggiungi altri campi della struct qui...
-        
-        // Salva la configurazione in EEPROM (se necessario)
+
+        strncpy(conf.wifi.SSID, server.arg("ssid").c_str(), sizeof(conf.wifi.SSID));
+        strncpy(conf.wifi.PASSWORD, server.arg("password").c_str(), sizeof(conf.wifi.PASSWORD));
+        strncpy(conf.ntpServer, server.arg("ntpServer").c_str(), sizeof(conf.ntpServer));
+        strncpy(conf.language, server.arg("language").c_str(), sizeof(conf.language));
+        conf.buzzSound = server.hasArg("buzzSound");
+        conf.fahrenheit = server.hasArg("fahrenheit");
+
         storeConfiguration(conf);
-        
-        server.send(200, "text/html", "Configurazione aggiornata! <a href='/'>Torna alla pagina principale</a>");
+
+        server.send(200, "text/html", "<html><body><h1>Configuration Saved!</h1></body></html>");
     } else {
-        server.send(405, "text/html", "Metodo non consentito");
+        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
     }
 }
 
@@ -92,11 +109,16 @@ void setup()
   Serial.printf("%s\n", SPIFFS_SUC);
 
   loadConfiguration(conf);
+
   WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP("ESP32-AP");
+  WiFi.softAP(AP_NAME);
+  IPAddress local_IP(IP_ADDRESS);
+  IPAddress gateway(GATEWAY);
+  IPAddress subnet(SUBNET);
+  WiFi.softAPConfig(local_IP, gateway, subnet);
 
   server.on("/", handleRoot);
-  server.on("/update", handleUpdate);
+  server.on("/submit", HTTP_POST, handleFormSubmit);
   server.begin();
 
   TMZ = new Timezone(conf.std, conf.dlt);
