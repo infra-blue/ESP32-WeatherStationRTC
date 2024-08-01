@@ -7,6 +7,7 @@
 #include <MD_MAX72xx.h>
 #include <MD_Parola.h>
 #include <WiFi.h>
+#include <WebServer.h>
 #include <NTPClient.h>
 #include <Timezone.h>
 #include <Wire.h>
@@ -31,6 +32,7 @@
 #include <Beep.h>
 
 Config conf;
+WebServer server(80);
 
 MD_Parola* matrix = nullptr;
 RTC_DS3231 rtc;
@@ -45,6 +47,40 @@ bool tic = true;
 int sound_interval = 0;
 uint8_t displaySelector = 0;
 
+void handleRoot() {
+    String html = "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Config ESP32</title></head><body>";
+    html += "<h1>Configurazione ESP32</h1>";
+    html += "<form action='/update' method='POST'>";
+    
+    // Form per i campi della struct Config
+    html += "SSID: <input type='text' name='SSID' value='" + String(conf.wifi.SSID) + "'><br>";
+    html += "Password: <input type='password' name='PASSWORD' value='" + String(conf.wifi.PASSWORD) + "'><br>";
+    // Aggiungi altri campi del form qui...
+    
+    html += "<input type='submit' value='Salva'>";
+    html += "</form>";
+    html += "</body></html>";
+    
+    server.send(200, "text/html", html);
+}
+
+// Funzione per gestire l'aggiornamento della configurazione
+void handleUpdate() {
+    if (server.method() == HTTP_POST) {
+        // Aggiorna i valori della struct Config dai campi del form
+        strncpy(conf.wifi.SSID, server.arg("SSID").c_str(), sizeof(conf.wifi.SSID));
+        strncpy(conf.wifi.PASSWORD, server.arg("PASSWORD").c_str(), sizeof(conf.wifi.PASSWORD));
+        // Aggiungi altri campi della struct qui...
+        
+        // Salva la configurazione in EEPROM (se necessario)
+        storeConfiguration(conf);
+        
+        server.send(200, "text/html", "Configurazione aggiornata! <a href='/'>Torna alla pagina principale</a>");
+    } else {
+        server.send(405, "text/html", "Metodo non consentito");
+    }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -56,6 +92,12 @@ void setup()
   Serial.printf("%s\n", SPIFFS_SUC);
 
   loadConfiguration(conf);
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP("ESP32-AP");
+
+  server.on("/", handleRoot);
+  server.on("/update", handleUpdate);
+  server.begin();
 
   TMZ = new Timezone(conf.std, conf.dlt);
   matrix = new MD_Parola(HW_TYPE, conf.max7219.DATA_PIN, conf.max7219.CLK_PIN, conf.max7219.CS_PIN, MAX7219_DEVICES);
@@ -168,6 +210,7 @@ void loop()
   */
 
   current_time = TMZ->toLocal((rtc.now()).unixtime());
+  server.handleClient();
 
   screen_button.update();
   if (screen_button.released())

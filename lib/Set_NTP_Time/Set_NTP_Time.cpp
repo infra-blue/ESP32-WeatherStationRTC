@@ -13,8 +13,6 @@ void set_NTP_time() {
 
   WiFiUDP ntpUDP;
   NTPClient timeClient(ntpUDP, conf.ntpServer);
-
-  WiFi.mode(WIFI_STA);
   uint8_t n_net = WiFi.scanNetworks();
 
   char ssid[256];
