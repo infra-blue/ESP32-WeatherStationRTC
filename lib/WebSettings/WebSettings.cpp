@@ -317,76 +317,74 @@ void handleSettings() {
 }
 
 void handleNetworkSubmit() {
-    if (server.method() == HTTP_POST) {
-        strncpy(conf.wifi.SSID, server.arg("ssid").c_str(), sizeof(conf.wifi.SSID) - 1);
-        strncpy(conf.wifi.PASSWORD, server.arg("password").c_str(), sizeof(conf.wifi.PASSWORD) - 1);
-        storeConfiguration(conf);
-        server.sendHeader("Location", "/settings", true);
-        server.send(302, "text/plain", "Redirecting to /");
-    } else {
-        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
-    }
+  if (server.method() == HTTP_POST) {
+    strncpy(conf.wifi.SSID, server.arg("ssid").c_str(), sizeof(conf.wifi.SSID) - 1);
+    strncpy(conf.wifi.PASSWORD, server.arg("password").c_str(), sizeof(conf.wifi.PASSWORD) - 1);
+    storeConfiguration(conf);
+    server.sendHeader("Location", "/settings", true);
+    server.send(302, "text/plain", "Redirecting to /");
+  } else {
+    server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
+  }
 }
 
 void handleNTPSubmit() {
-    if (server.method() == HTTP_POST) {
-        strncpy(conf.ntpServer, server.arg("ntpServer").c_str(), sizeof(conf.ntpServer) - 1);
-        storeConfiguration(conf);
-        server.sendHeader("Location", "/settings", true);
-        server.send(302, "text/plain", "Redirecting to /");
-    } else {
-        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
-    }
+  if (server.method() == HTTP_POST) {
+    strncpy(conf.ntpServer, server.arg("ntpServer").c_str(), sizeof(conf.ntpServer) - 1);
+    storeConfiguration(conf);
+    server.sendHeader("Location", "/settings", true);
+    server.send(302, "text/plain", "Redirecting to /");
+  } else {
+    server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
+  }
 }
 
 void handleLanguageSubmit() {
-    if (server.method() == HTTP_POST) {
-        strncpy(conf.language, server.arg("language").c_str(), sizeof(conf.language) - 1);
-        storeConfiguration(conf);
-        server.sendHeader("Location", "/settings", true);
-        server.send(302, "text/plain", "Redirecting to /");
-    } else {
-        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
-    }
+  if (server.method() == HTTP_POST) {
+    strncpy(conf.language, server.arg("language").c_str(), sizeof(conf.language) - 1);
+    storeConfiguration(conf);
+    server.sendHeader("Location", "/settings", true);
+    server.send(302, "text/plain", "Redirecting to /");
+  } else {
+    server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
+  }
 }
 
 void handleTimezoneSubmit() {
-    if (server.method() == HTTP_POST) {
-        // Update timezone configuration from POST data
-        strncpy(conf.std.abbrev, server.arg("stdAbbrev").c_str(), sizeof(conf.std.abbrev) - 1);
-        conf.std.abbrev[sizeof(conf.std.abbrev) - 1] = '\0';  // Null-terminate the string
-        conf.std.week = server.arg("stdWeek").toInt();
-        conf.std.dow = server.arg("stdDOW").toInt();
-        conf.std.month = server.arg("stdMonth").toInt();
-        conf.std.hour = server.arg("stdHour").toInt();
-        conf.std.offset = server.arg("stdOffset").toInt();
-
-        strncpy(conf.dlt.abbrev, server.arg("dltAbbrev").c_str(), sizeof(conf.dlt.abbrev) - 1);
-        conf.dlt.abbrev[sizeof(conf.dlt.abbrev) - 1] = '\0';  // Null-terminate the string
-        conf.dlt.week = server.arg("dltWeek").toInt();
-        conf.dlt.dow = server.arg("dltDOW").toInt();
-        conf.dlt.month = server.arg("dltMonth").toInt();
-        conf.dlt.hour = server.arg("dltHour").toInt();
-        conf.dlt.offset = server.arg("dltOffset").toInt();
-
-        storeConfiguration(conf);
-        server.sendHeader("Location", "/settings", true);
-        server.send(302, "text/plain", "Redirecting to /");
-    } else {
-        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
-    }
+  if (server.method() == HTTP_POST) {
+    // Update timezone configuration from POST data
+    strncpy(conf.std.abbrev, server.arg("stdAbbrev").c_str(), sizeof(conf.std.abbrev) - 1);
+    conf.std.abbrev[sizeof(conf.std.abbrev) - 1] = '\0';  // Null-terminate the string
+    conf.std.week = server.arg("stdWeek").toInt();
+    conf.std.dow = server.arg("stdDOW").toInt();
+    conf.std.month = server.arg("stdMonth").toInt();
+    conf.std.hour = server.arg("stdHour").toInt();
+    conf.std.offset = server.arg("stdOffset").toInt();
+    strncpy(conf.dlt.abbrev, server.arg("dltAbbrev").c_str(), sizeof(conf.dlt.abbrev) - 1);
+    conf.dlt.abbrev[sizeof(conf.dlt.abbrev) - 1] = '\0';  // Null-terminate the string
+    conf.dlt.week = server.arg("dltWeek").toInt();
+    conf.dlt.dow = server.arg("dltDOW").toInt();
+    conf.dlt.month = server.arg("dltMonth").toInt();
+    conf.dlt.hour = server.arg("dltHour").toInt();
+    conf.dlt.offset = server.arg("dltOffset").toInt();
+    storeConfiguration(conf);
+    server.sendHeader("Location", "/settings", true);
+    server.send(302, "text/plain", "Redirecting to /");
+  } else {
+    server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
+  }
 }
 
 void handleAdditionalSubmit() {
-    if (server.method() == HTTP_POST) {
-        conf.buzzSound = server.hasArg("buzzSound");
-        conf.fahrenheit = server.hasArg("fahrenheit");
-        storeConfiguration(conf);
-        server.sendHeader("Location", "/settings", true);
-        server.send(302, "text/plain", "Redirecting to /");
-    } else {
-        server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
-    }
+  if (server.method() == HTTP_POST) {
+    conf.buzzSound = server.hasArg("buzzSound");
+    conf.fahrenheit = server.hasArg("fahrenheit");
+    storeConfiguration(conf);
+    server.sendHeader("Location", "/settings", true);
+    server.send(302, "text/plain", "Redirecting to /");
+  } else {
+    server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
+  }
 }
 
 void handleToggleScreen() {
