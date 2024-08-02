@@ -34,9 +34,9 @@
         "BUZZER_PIN": 14
     },
 
-    "NTP_SERVER": "time.inrim.it",
+    "NTP_SERVER": "pool.ntp.org",
 
-    "LANGUAGE": "it",
+    "LANGUAGE": "en",
 
     "BUZZ_SOUND": true,
 

@@ -165,9 +165,9 @@ void setup() {
   matrix->displayClear();
 
   bme.setSampling(Adafruit_BME280::MODE_NORMAL,
-                  Adafruit_BME280::SAMPLING_X1,
-                  Adafruit_BME280::SAMPLING_X1,
-                  Adafruit_BME280::SAMPLING_X1,
+                  Adafruit_BME280::SAMPLING_X8,
+                  Adafruit_BME280::SAMPLING_X16,
+                  Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::FILTER_OFF,
                   Adafruit_BME280::STANDBY_MS_1000
                   );
