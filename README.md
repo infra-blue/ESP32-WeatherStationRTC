@@ -1,4 +1,5 @@
 # ESP32-WeatherStationRTC
+[![CodeFactor](https://www.codefactor.io/repository/github/infra-blue/esp32-weatherstationrtc/badge/main)](https://www.codefactor.io/repository/github/infra-blue/esp32-weatherstationrtc/overview/main)
 
 <div align="center">
   <img src="assets/clock.gif" alt="Weather Station">
