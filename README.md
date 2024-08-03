@@ -67,7 +67,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 
 | Buzzer | ESP32-DevKitC V4 |
 | ----------- | ----------- |
-|  + | 14 |
+|  + | 25 |
 |  - | GND |
 
 | I2C DEVICES| ESP32-DevKitC V4 |

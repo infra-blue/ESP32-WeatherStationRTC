@@ -31,7 +31,7 @@
 
     "PINS": {
         "BUTTON_PIN": 0,
-        "BUZZER_PIN": 14
+        "BUZZER_PIN": 25
     },
 
     "NTP_SERVER": "pool.ntp.org",
