@@ -202,8 +202,8 @@ void handleSettings() {
               String(conf.std.week == 3 ? " selected" : "") + R"(>Third</option>
               <option value="4")" +
               String(conf.std.week == 4 ? " selected" : "") + R"(>Fourth</option>
-              <option value="5")" +
-              String(conf.std.week == 5 ? " selected" : "") + R"(>Last</option>
+              <option value="0")" +
+              String(conf.std.week == 0 ? " selected" : "") + R"(>Last</option>
             </select><br>
             <label for="stdDOW">Day of Week:</label>
             <select id="stdDOW" name="stdDOW">
@@ -269,8 +269,8 @@ void handleSettings() {
               String(conf.dlt.week == 3 ? " selected" : "") + R"(>Third</option>
               <option value="4")" +
               String(conf.dlt.week == 4 ? " selected" : "") + R"(>Fourth</option>
-              <option value="5")" +
-              String(conf.dlt.week == 5 ? " selected" : "") + R"(>Last</option>
+              <option value="0")" +
+              String(conf.dlt.week == 0 ? " selected" : "") + R"(>Last</option>
             </select><br>
             <label for="dltDOW">Day of Week:</label>
             <select id="dltDOW" name="dltDOW">

@@ -5,6 +5,47 @@
 #include "Config_Parser.h"
 #define PATH_TO_CONF "/config.json"
 
+void printConfiguration(Config config) {
+    Serial.printf("Standard TimeChangeRule:\n");
+    Serial.printf("  Abbreviation: %s\n", config.std.abbrev);
+    Serial.printf("  Week: %d\n", config.std.week);
+    Serial.printf("  Day of Week: %d\n", config.std.dow);
+    Serial.printf("  Month: %d\n", config.std.month);
+    Serial.printf("  Hour: %d\n", config.std.hour);
+    Serial.printf("  Offset: %d\n", config.std.offset);
+    
+    Serial.printf("Daylight TimeChangeRule:\n");
+    Serial.printf("  Abbreviation: %s\n", config.dlt.abbrev);
+    Serial.printf("  Week: %d\n", config.dlt.week);
+    Serial.printf("  Day of Week: %d\n", config.dlt.dow);
+    Serial.printf("  Month: %d\n", config.dlt.month);
+    Serial.printf("  Hour: %d\n", config.dlt.hour);
+    Serial.printf("  Offset: %d\n", config.dlt.offset);
+    
+    Serial.printf("I2C Addresses:\n");
+    Serial.printf("  BME_280: %d\n", config.i2c.BME_280);
+    Serial.printf("  BH1750: %d\n", config.i2c.BH1750);
+    Serial.printf("  DS3231: %d\n", config.i2c.DS3231);
+    
+    Serial.printf("MAX7219 Pins:\n");
+    Serial.printf("  CLK_PIN: %d\n", config.max7219.CLK_PIN);
+    Serial.printf("  DATA_PIN: %d\n", config.max7219.DATA_PIN);
+    Serial.printf("  CS_PIN: %d\n", config.max7219.CS_PIN);
+    
+    Serial.printf("Other Pins:\n");
+    Serial.printf("  BUTTON_PIN: %d\n", config.pins.BUTTON_PIN);
+    Serial.printf("  BUZZER_PIN: %d\n", config.pins.BUZZER_PIN);
+    
+    Serial.printf("NTP Server: %s\n", config.ntpServer);
+    Serial.printf("Language: %s\n", config.language);
+    Serial.printf("Buzzer Sound: %s\n", config.buzzSound ? "true" : "false");
+    Serial.printf("Fahrenheit: %s\n", config.fahrenheit ? "true" : "false");
+    
+    Serial.printf("WiFi Credentials:\n");
+    Serial.printf("  SSID: %s\n", config.wifi.SSID);
+    Serial.printf("  Password: %s\n", config.wifi.PASSWORD);
+}
+
 void loadConfiguration(Config& config) {
   File file = SPIFFS.open(PATH_TO_CONF, FILE_READ);
   JsonDocument conf;
@@ -116,45 +157,4 @@ void storeConfiguration(Config config) {
   }
 
   file.close();
-}
-
-void printConfiguration(Config config) {
-    Serial.printf("Standard TimeChangeRule:\n");
-    Serial.printf("  Abbreviation: %s\n", config.std.abbrev);
-    Serial.printf("  Week: %d\n", config.std.week);
-    Serial.printf("  Day of Week: %d\n", config.std.dow);
-    Serial.printf("  Month: %d\n", config.std.month);
-    Serial.printf("  Hour: %d\n", config.std.hour);
-    Serial.printf("  Offset: %d\n", config.std.offset);
-    
-    Serial.printf("Daylight TimeChangeRule:\n");
-    Serial.printf("  Abbreviation: %s\n", config.dlt.abbrev);
-    Serial.printf("  Week: %d\n", config.dlt.week);
-    Serial.printf("  Day of Week: %d\n", config.dlt.dow);
-    Serial.printf("  Month: %d\n", config.dlt.month);
-    Serial.printf("  Hour: %d\n", config.dlt.hour);
-    Serial.printf("  Offset: %d\n", config.dlt.offset);
-    
-    Serial.printf("I2C Addresses:\n");
-    Serial.printf("  BME_280: %d\n", config.i2c.BME_280);
-    Serial.printf("  BH1750: %d\n", config.i2c.BH1750);
-    Serial.printf("  DS3231: %d\n", config.i2c.DS3231);
-    
-    Serial.printf("MAX7219 Pins:\n");
-    Serial.printf("  CLK_PIN: %d\n", config.max7219.CLK_PIN);
-    Serial.printf("  DATA_PIN: %d\n", config.max7219.DATA_PIN);
-    Serial.printf("  CS_PIN: %d\n", config.max7219.CS_PIN);
-    
-    Serial.printf("Other Pins:\n");
-    Serial.printf("  BUTTON_PIN: %d\n", config.pins.BUTTON_PIN);
-    Serial.printf("  BUZZER_PIN: %d\n", config.pins.BUZZER_PIN);
-    
-    Serial.printf("NTP Server: %s\n", config.ntpServer);
-    Serial.printf("Language: %s\n", config.language);
-    Serial.printf("Buzzer Sound: %s\n", config.buzzSound ? "true" : "false");
-    Serial.printf("Fahrenheit: %s\n", config.fahrenheit ? "true" : "false");
-    
-    Serial.printf("WiFi Credentials:\n");
-    Serial.printf("  SSID: %s\n", config.wifi.SSID);
-    Serial.printf("  Password: %s\n", config.wifi.PASSWORD);
 }
