@@ -168,8 +168,8 @@ void setup() {
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
-                  Adafruit_BME280::FILTER_OFF,
-                  Adafruit_BME280::STANDBY_MS_1000
+                  Adafruit_BME280::FILTER_X4,
+                  Adafruit_BME280::STANDBY_MS_500
                   );
 
   printConfiguration(conf);
