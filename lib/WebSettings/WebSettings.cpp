@@ -2,7 +2,7 @@
 
 void handleSettings() {
     String html = R"(
-<!DOCTYPE HTML>
+    <!DOCTYPE HTML>
     <html>
       <head>
         <title>ESP32 Settings</title>
@@ -16,7 +16,7 @@ void handleSettings() {
           }
           h1 {
             text-align: center;
-            font-size: 2em;
+            font-size: 3em;
             color: white;
             margin-bottom: 20px;
           }
@@ -94,11 +94,10 @@ void handleSettings() {
           .checkbox-container {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin: 10px 0;
           }
           .checkbox-container label {
-            margin-bottom: 0;
-            margin-right: 10px;
+            margin-left: 10px;
           }
           .checkbox-container label:first-child {
             margin-right: 0;
@@ -329,21 +328,23 @@ void handleSettings() {
 
         <!-- Additional Settings Form -->
         <form action="/submitAdditional" method="post">
-          <div class="section">
-            <h2>Additional Settings</h2>
-            <div class="checkbox-container">
-              <label for="buzzSound">Buzzer Sound</label>
-              <input type="checkbox" id="buzzSound" name="buzzSound")" + String(conf.buzzSound ? " checked " : "") + R"()>
+          <div class="container">
+            <div class="section">
+              <h2>Additional Settings</h2>
+              <div class="checkbox-container">
+                <input type="checkbox" id="buzzSound" name="buzzSound")" + String(conf.buzzSound ? " checked " : "") + R"()>
+                <label for="buzzSound">Buzzer Sound</label>
+              </div>
+              <div class="checkbox-container">
+                <input type="checkbox" id="fahrenheit" name="fahrenheit")" + String(conf.fahrenheit ? " checked " : "") + R"()>
+                <label for="fahrenheit">Temperature in Fahrenheit</label>
+              </div>
+              <input type="submit" value="Save Additional Settings" class="button">
             </div>
-            <div class="checkbox-container">
-              <label for="fahrenheit">Temperature in Fahrenheit</label>
-              <input type="checkbox" id="fahrenheit" name="fahrenheit")" + String(conf.fahrenheit ? " checked " : "") + R"()>
-            </div>
-            <input type="submit" value="Save Additional Settings">
           </div>
         </form>
       </body>
-    </html>
+      </html>
     )";
 
     server.send(200, "text/html", html);
@@ -466,109 +467,124 @@ void handleHome() {
   sprintf(second, "%02d", current_time.second());
 
   String html = R"HTML(
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Home</title>
-      <style>
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #222;
+        color: #fff;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        text-align: center;
+        font-size: 3em;
+        color: white;
+        margin-bottom: 20px;
+      }
+      h2 {
+        text-align: center;
+        font-size: 2em;
+        color: white;
+        margin-bottom: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: rgba(50, 50, 50, 0.8);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+      .section {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #555;
+        border-radius: 8px;
+        background-color: #444;
+      }
+      p {
+        font-size: 18px;
+        line-height: 1.6;
+        margin: 10px 0;
+        text-align: center;
+      }
+      .data {
+        font-weight: bold;
+        color: #03dac6;
+      }
+      .button {
+        display: block;
+        width: 100%;
+        padding: 10px 20px;
+        font-size: 18px;
+        color: white;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-top: 20px;
+        text-align: center;
+        box-sizing: border-box; /* Ensure padding is included in the width */
+      }
+      .button-container {
+        text-align: center; /* Center align the button container */
+      }
+      .button:hover {
+        background-color: #0056b3;
+      }
+      @media (max-width: 600px) {
         body {
-          font-family: Arial, sans-serif;
-          background-color: #222;
-          color: #fff;
-          margin: 0;
-          padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 2em;
-            color: white;
-            margin-bottom: 20px;
-        }
-        h2 {
-          text-align: center;
-          font-size: 1.5em;
-          color: #007bff;
-          margin-bottom: 20px;
+          padding: 10px;
         }
         .container {
-          max-width: 600px;
-          margin: 0 auto;
-          background-color: rgba(50, 50, 50, 0.8);
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-          display: flex;
-          flex-direction: column;
-          align-items: center; /* Center align items horizontally */
-          text-align: center; /* Center align text */
+          width: 100%;
+          padding: 15px;
+          box-shadow: none;
+        }
+        h1 {
+          font-size: 2em;
+        }
+        h2 {
+          font-size: 1.5em;
         }
         p {
-          font-size: 18px;
-          line-height: 1.6;
-          margin: 10px 0;
-        }
-        .data {
-          font-weight: bold;
-          color: #03dac6;
+          font-size: 16px;
         }
         .button {
-          display: inline-block;
-          padding: 10px 20px;
-          font-size: 18px;
-          color: white;
-          background-color: #007bff;
-          border: none;
-          border-radius: 5px;
-          text-decoration: none;
-          margin-top: 20px;
-          text-align: center;
+          width: 100%;
+          padding: 12px;
+          font-size: 16px;
         }
-        .button:hover {
-          background-color: #0056b3;
-        }
-        @media (max-width: 600px) {
-          body {
-            padding: 10px;
-          }
-          .container {
-            width: 100%;
-            padding: 15px;
-            box-shadow: none;
-          }
-          h1 {
-            font-size: 2em;
-          }
-          h2 {
-            font-size: 1.5em;
-          }
-          p {
-            font-size: 16px;
-          }
-          .button {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <h1><strong>ESP32 WeatherStation</strong> Home</h1>
-      <div class="container">
+      }
+    </style>
+  </head>
+  <body>
+    <h1><strong>ESP32 WeatherStation</strong> Home</h1>
+    <div class="container">
+      <div class="section">
         <h2>Sensor Data</h2>
         <p>Temperature: <span class="data">)HTML" + temperatureValue + " " + temperatureUnit + R"HTML(</span></p>
         <p>Humidity: <span class="data">)HTML" + String(humidity) + R"HTML( %</span></p>
         <p>Pressure: <span class="data">)HTML" + String(pressure) + R"HTML( hPa</span></p>
+      </div>
+      <div class="section">
         <h2>Date and Time</h2>
         <p>Date: <span class="data">)HTML" + String(day) + "/" + String(month) + "/" + String(year) + R"HTML(</span></p>
         <p>Time: <span class="data">)HTML" + String(hour) + ":" + String(minute) + ":" + String(second) + R"HTML(</span></p>
+      </div>
+      <div class="button-container">
         <a href='/settings' class="button">Settings</a>
       </div>
-    </body>
-    </html>
-    )HTML";
+    </div>
+  </body>
+  </html>
+  )HTML";
 
   server.send(200, "text/html", html);
 }
