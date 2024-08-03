@@ -2,7 +2,7 @@
 
 void handleSettings() {
     String html = R"(
-    <!DOCTYPE HTML>
+<!DOCTYPE HTML>
     <html>
       <head>
         <title>ESP32 Settings</title>
@@ -45,6 +45,23 @@ void handleSettings() {
             box-sizing: border-box;
             background-color: #444;
             color: #fff;
+          }
+          .button-row {
+            display: flex;
+            justify-content: space-between;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .button-row form {
+            flex: 1;
+            margin-right: 10px;
+          }
+          .button-row form:last-child {
+            margin-right: 0;
+          }
+          .button-row input[type="submit"] {
+            width: 100%;
           }
           input[type="submit"] {
             background-color: #007bff; /* Blue */
@@ -90,18 +107,31 @@ void handleSettings() {
             form {
               max-width: 100%;
             }
+            .button-row {
+              flex-direction: column;
+            }
+            .button-row form {
+              margin-right: 0;
+              margin-bottom: 10px;
+            }
+            .button-row form:last-child {
+              margin-bottom: 0;
+            }
           }
         </style>
       </head>
       <body>
+
         <h1><strong>ESP32 WeatherStation</strong> Settings</h1>
-        <form action="/" method="get">
-          <input type="submit" value="Home">
-        </form>
-        <form action="/toggleScreen" method="post">
-          <input type="submit" value=")" +
-          String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"(" style="width: 100%;">
-        </form>
+        <div class="button-row">
+          <form action="/" method="get">
+            <input type="submit" value="Home">
+          </form>
+          <form action="/toggleScreen" method="post">
+            <input type="submit" value=")" +
+            String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"(">
+          </form>
+        </div>
 
         <!-- Network Settings Form -->
         <form action="/submitNetwork" method="post">
@@ -128,7 +158,10 @@ void handleSettings() {
         </form>
 
         <form action="/updateTime" method="post">
-          <input type="submit" value="Update Time">
+          <div class="section">
+            <h2>Connect to WiFi to update the time</h2>
+            <input type="submit" value="Update Time">
+          </div>
         </form>
 
         <!-- Language Form -->
@@ -418,12 +451,19 @@ void handleHome() {
   String temperatureUnit = conf.fahrenheit ? "Fahrenheit" : "Celsius";
   String temperatureValue = conf.fahrenheit ? String(temperature * 1.8 + 32) : String(temperature);
 
-  int year = current_time.year();
-  int month = current_time.month();
-  int day = current_time.day();
-  int hour = current_time.hour();
-  int minute = current_time.minute();
-  int second = current_time.second();
+  char year[] = "0000";
+  char month[] = "00";
+  char day[] = "00";
+  char hour[] = "00";
+  char minute[] = "00";
+  char second[] = "00";
+
+  sprintf(year, "%04d", current_time.year());
+  sprintf(month, "%02d", current_time.month());
+  sprintf(day, "%02d", current_time.day());
+  sprintf(hour, "%02d", current_time.hour());
+  sprintf(minute, "%02d", current_time.minute());
+  sprintf(second, "%02d", current_time.second());
 
   String html = R"HTML(
     <!DOCTYPE html>
@@ -441,8 +481,14 @@ void handleHome() {
           padding: 20px;
         }
         h1 {
+            text-align: center;
+            font-size: 2em;
+            color: white;
+            margin-bottom: 20px;
+        }
+        h2 {
           text-align: center;
-          font-size: 2em;
+          font-size: 1.5em;
           color: #007bff;
           margin-bottom: 20px;
         }
@@ -492,6 +538,9 @@ void handleHome() {
             box-shadow: none;
           }
           h1 {
+            font-size: 2em;
+          }
+          h2 {
             font-size: 1.5em;
           }
           p {
@@ -506,20 +555,20 @@ void handleHome() {
       </style>
     </head>
     <body>
+      <h1><strong>ESP32 WeatherStation</strong> Home</h1>
       <div class="container">
-        <h1>Sensor Data</h1>
+        <h2>Sensor Data</h2>
         <p>Temperature: <span class="data">)HTML" + temperatureValue + " " + temperatureUnit + R"HTML(</span></p>
         <p>Humidity: <span class="data">)HTML" + String(humidity) + R"HTML( %</span></p>
         <p>Pressure: <span class="data">)HTML" + String(pressure) + R"HTML( hPa</span></p>
-        <h1>Date and Time</h1>
+        <h2>Date and Time</h2>
         <p>Date: <span class="data">)HTML" + String(day) + "/" + String(month) + "/" + String(year) + R"HTML(</span></p>
         <p>Time: <span class="data">)HTML" + String(hour) + ":" + String(minute) + ":" + String(second) + R"HTML(</span></p>
-        <a href='/settings' class="button">Go to Settings</a>
+        <a href='/settings' class="button">Settings</a>
       </div>
     </body>
     </html>
     )HTML";
 
-  // Send HTML page as response
   server.send(200, "text/html", html);
 }
