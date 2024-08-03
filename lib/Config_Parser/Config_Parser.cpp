@@ -92,6 +92,17 @@ void storeConfiguration(Config config) {
   conf["DL_TIME"]["hour"] = config.dlt.hour;
   conf["DL_TIME"]["offset"] = config.dlt.offset;
 
+  conf["I2C_ADDR"]["BME_280"] = config.i2c.BME_280;
+  conf["I2C_ADDR"]["BH1750"] = config.i2c.BH1750;
+  conf["I2C_ADDR"]["DS3231"] = config.i2c.DS3231;
+
+  conf["MAX7219_PINS"]["CLK_PIN"] = config.max7219.CLK_PIN;
+  conf["MAX7219_PINS"]["DATA_PIN"] = config.max7219.DATA_PIN;
+  conf["MAX7219_PINS"]["CS_PIN"] = config.max7219.CS_PIN;
+
+  conf["PINS"]["BUTTON_PIN"] = config.pins.BUTTON_PIN;
+  conf["PINS"]["BUZZER_PIN"] = config.pins.BUZZER_PIN;
+
   conf["NTP_SERVER"] = config.ntpServer;
   conf["LANGUAGE"] = config.language;
   conf["BUZZ_SOUND"] = config.buzzSound;
@@ -123,7 +134,21 @@ void printConfiguration(Config config) {
     Serial.printf("  Month: %d\n", config.dlt.month);
     Serial.printf("  Hour: %d\n", config.dlt.hour);
     Serial.printf("  Offset: %d\n", config.dlt.offset);
-
+    
+    Serial.printf("I2C Addresses:\n");
+    Serial.printf("  BME_280: %d\n", config.i2c.BME_280);
+    Serial.printf("  BH1750: %d\n", config.i2c.BH1750);
+    Serial.printf("  DS3231: %d\n", config.i2c.DS3231);
+    
+    Serial.printf("MAX7219 Pins:\n");
+    Serial.printf("  CLK_PIN: %d\n", config.max7219.CLK_PIN);
+    Serial.printf("  DATA_PIN: %d\n", config.max7219.DATA_PIN);
+    Serial.printf("  CS_PIN: %d\n", config.max7219.CS_PIN);
+    
+    Serial.printf("Other Pins:\n");
+    Serial.printf("  BUTTON_PIN: %d\n", config.pins.BUTTON_PIN);
+    Serial.printf("  BUZZER_PIN: %d\n", config.pins.BUZZER_PIN);
+    
     Serial.printf("NTP Server: %s\n", config.ntpServer);
     Serial.printf("Language: %s\n", config.language);
     Serial.printf("Buzzer Sound: %s\n", config.buzzSound ? "true" : "false");
