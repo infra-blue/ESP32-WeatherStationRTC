@@ -17,11 +17,12 @@ void wifi_connetion() {
 
   if(strcmp(conf.wifi.SSID, "") == 0) {
     bool open_ap_found = false;
+    char SSID[256];
 
     if (n_net) {
       for (uint8_t i = 0; i < n_net; ++i)
         if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
-          strlcpy(conf.wifi.SSID, WiFi.SSID(i).c_str(), sizeof(conf.wifi.SSID));
+          strlcpy(SSID, WiFi.SSID(i).c_str(), sizeof(SSID));
           open_ap_found = true;
           break;
         }
@@ -30,8 +31,8 @@ void wifi_connetion() {
       Serial.println("No network found.\n");
 
     if(open_ap_found) {
-      WiFi.begin(conf.wifi.SSID);
-      Serial.printf("Connecting to %s ", conf.wifi.SSID);
+      WiFi.begin(SSID);
+      Serial.printf("Connecting to %s ", SSID);
     }
     else {
       Serial.println("No open network found.\n");
@@ -77,10 +78,10 @@ void set_NTP_time() {
 
   if(timeClient.isTimeSet()) {
     rtc.adjust(timeClient.getEpochTime());
-    Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", conf.wifi.SSID);
+    Serial.println("RTC adjusted with NTP time.\n");
   }
   else {
-    Serial.printf("NTP server error. Time not set.\n");
+    Serial.println("NTP server error. Time not set.\n");
     rtc.adjust(DateTime(uint32_t(0)));
   }
 }

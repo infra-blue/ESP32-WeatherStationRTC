@@ -130,6 +130,7 @@ void setup() {
 
     wifi_connetion();
     set_NTP_time();
+    Serial.println("Disconnecting from WiFi.\n");
     WiFi.disconnect();
   }
 

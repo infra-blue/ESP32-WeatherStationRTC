@@ -1,7 +1,7 @@
 #include "WebSettings.h"
 
 void handleSettings() {
-    String html = R"(
+    String html = R"HTML(
     <!DOCTYPE HTML>
     <html>
       <head>
@@ -64,7 +64,7 @@ void handleSettings() {
             width: 100%;
           }
           input[type="submit"] {
-            background-color: #007bff; /* Blue */
+            background-color: #007bff;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -76,7 +76,7 @@ void handleSettings() {
             width: 100%;
           }
           input[type="submit"]:hover {
-            background-color: #0056b3; /* Darker Blue */
+            background-color: #0056b3;
           }
           .section {
             margin-bottom: 20px;
@@ -127,8 +127,8 @@ void handleSettings() {
             <input type="submit" value="Home">
           </form>
           <form action="/toggleScreen" method="post">
-            <input type="submit" value=")" +
-            String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"(">
+            <input type="submit" value=")HTML" +
+            String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"HTML(">
           </form>
         </div>
 
@@ -137,8 +137,8 @@ void handleSettings() {
           <div class="section">
             <h2>Network Settings</h2>
             <label for="ssid">SSID:</label>
-            <input type="text" id="ssid" name="ssid" value=")" +
-              String(conf.wifi.SSID) + R"("><br>
+            <input type="text" id="ssid" name="ssid" value=")HTML" +
+              String(conf.wifi.SSID) + R"HTML("><br>
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" value=""><br>
             <input type="submit" value="Save Network Settings">
@@ -150,8 +150,8 @@ void handleSettings() {
           <div class="section">
             <h2>NTP Server Settings</h2>
             <label for="ntpServer">NTP Server:</label>
-            <input type="text" id="ntpServer" name="ntpServer" value=")" +
-              String(conf.ntpServer) + R"("><br>
+            <input type="text" id="ntpServer" name="ntpServer" value=")HTML" +
+              String(conf.ntpServer) + R"HTML("><br>
             <input type="submit" value="Save NTP Server">
           </div>
         </form>
@@ -169,16 +169,16 @@ void handleSettings() {
             <h2>Language Settings</h2>
             <label for="language">Language:</label>
             <select id="language" name="language">
-              <option value="en")" +
-              String(!strcmp(conf.language, "en") ? " selected" : "") + R"(>English</option>
-              <option value="it")" +
-              String(!strcmp(conf.language, "it") ? " selected" : "") + R"(>Italian</option>
-              <option value="es")" +
-              String(!strcmp(conf.language, "es") ? " selected" : "") + R"(>Spanish</option>
-              <option value="de")" +
-              String(!strcmp(conf.language, "de") ? " selected" : "") + R"(>German</option>
-              <option value="fr")" +
-              String(!strcmp(conf.language, "fr") ? " selected" : "") + R"(>French</option>
+              <option value="en")HTML" +
+              String(!strcmp(conf.language, "en") ? " selected" : "") + R"HTML(>English</option>
+              <option value="it")HTML" +
+              String(!strcmp(conf.language, "it") ? " selected" : "") + R"HTML(>Italian</option>
+              <option value="es")HTML" +
+              String(!strcmp(conf.language, "es") ? " selected" : "") + R"HTML(>Spanish</option>
+              <option value="de")HTML" +
+              String(!strcmp(conf.language, "de") ? " selected" : "") + R"HTML(>German</option>
+              <option value="fr")HTML" +
+              String(!strcmp(conf.language, "fr") ? " selected" : "") + R"HTML(>French</option>
             </select><br>
             <input type="submit" value="Save Language Settings">
           </div>
@@ -190,138 +190,138 @@ void handleSettings() {
             <h2>Timezone Settings</h2>
             <h3>Standard Time</h3>
             <label for="stdAbbrev">Abbreviation:</label>
-            <input type="text" id="stdAbbrev" name="stdAbbrev" value=")" +
-              String(conf.std.abbrev) + R"("><br>
+            <input type="text" id="stdAbbrev" name="stdAbbrev" value=")HTML" +
+              String(conf.std.abbrev) + R"HTML("><br>
             <label for="stdWeek">Week:</label>
             <select id="stdWeek" name="stdWeek">
-              <option value="1")" +
-              String(conf.std.week == 1 ? " selected" : "") + R"(>First</option>
-              <option value="2")" +
-              String(conf.std.week == 2 ? " selected" : "") + R"(>Second</option>
-              <option value="3")" +
-              String(conf.std.week == 3 ? " selected" : "") + R"(>Third</option>
-              <option value="4")" +
-              String(conf.std.week == 4 ? " selected" : "") + R"(>Fourth</option>
-              <option value="0")" +
-              String(conf.std.week == 0 ? " selected" : "") + R"(>Last</option>
+              <option value="1")HTML" +
+              String(conf.std.week == 1 ? " selected" : "") + R"HTML(>First</option>
+              <option value="2")HTML" +
+              String(conf.std.week == 2 ? " selected" : "") + R"HTML(>Second</option>
+              <option value="3")HTML" +
+              String(conf.std.week == 3 ? " selected" : "") + R"HTML(>Third</option>
+              <option value="4")HTML" +
+              String(conf.std.week == 4 ? " selected" : "") + R"HTML(>Fourth</option>
+              <option value="0")HTML" +
+              String(conf.std.week == 0 ? " selected" : "") + R"HTML(>Last</option>
             </select><br>
             <label for="stdDOW">Day of Week:</label>
             <select id="stdDOW" name="stdDOW">
-              <option value="1")" +
-              String(conf.std.dow == 1 ? " selected" : "") + R"(>Sunday</option>
-              <option value="2")" +
-              String(conf.std.dow == 2 ? " selected" : "") + R"(>Monday</option>
-              <option value="3")" +
-              String(conf.std.dow == 3 ? " selected" : "") + R"(>Tuesday</option>
-              <option value="4")" +
-              String(conf.std.dow == 4 ? " selected" : "") + R"(>Wednesday</option>
-              <option value="5")" +
-              String(conf.std.dow == 5 ? " selected" : "") + R"(>Thursday</option>
-              <option value="6")" +
-              String(conf.std.dow == 6 ? " selected" : "") + R"(>Friday</option>
-              <option value="7")" +
-              String(conf.std.dow == 7 ? " selected" : "") + R"(>Saturday</option>
+              <option value="1")HTML" +
+              String(conf.std.dow == 1 ? " selected" : "") + R"HTML(>Sunday</option>
+              <option value="2")HTML" +
+              String(conf.std.dow == 2 ? " selected" : "") + R"HTML(>Monday</option>
+              <option value="3")HTML" +
+              String(conf.std.dow == 3 ? " selected" : "") + R"HTML(>Tuesday</option>
+              <option value="4")HTML" +
+              String(conf.std.dow == 4 ? " selected" : "") + R"HTML(>Wednesday</option>
+              <option value="5")HTML" +
+              String(conf.std.dow == 5 ? " selected" : "") + R"HTML(>Thursday</option>
+              <option value="6")HTML" +
+              String(conf.std.dow == 6 ? " selected" : "") + R"HTML(>Friday</option>
+              <option value="7")HTML" +
+              String(conf.std.dow == 7 ? " selected" : "") + R"HTML(>Saturday</option>
             </select><br>
             <label for="stdMonth">Month:</label>
             <select id="stdMonth" name="stdMonth">
-              <option value="1")" +
-              String(conf.std.month == 1 ? " selected" : "") + R"(>January</option>
-              <option value="2")" +
-              String(conf.std.month == 2 ? " selected" : "") + R"(>February</option>
-              <option value="3")" +
-              String(conf.std.month == 3 ? " selected" : "") + R"(>March</option>
-              <option value="4")" +
-              String(conf.std.month == 4 ? " selected" : "") + R"(>April</option>
-              <option value="5")" +
-              String(conf.std.month == 5 ? " selected" : "") + R"(>May</option>
-              <option value="6")" +
-              String(conf.std.month == 6 ? " selected" : "") + R"(>June</option>
-              <option value="7")" +
-              String(conf.std.month == 7 ? " selected" : "") + R"(>July</option>
-              <option value="8")" +
-              String(conf.std.month == 8 ? " selected" : "") + R"(>August</option>
-              <option value="9")" +
-              String(conf.std.month == 9 ? " selected" : "") + R"(>September</option>
-              <option value="10")" +
-              String(conf.std.month == 10 ? " selected" : "") + R"(>October</option>
-              <option value="11")" +
-              String(conf.std.month == 11 ? " selected" : "") + R"(>November</option>
-              <option value="12")" +
-              String(conf.std.month == 12 ? " selected" : "") + R"(>December</option>
+              <option value="1")HTML" +
+              String(conf.std.month == 1 ? " selected" : "") + R"HTML(>January</option>
+              <option value="2")HTML" +
+              String(conf.std.month == 2 ? " selected" : "") + R"HTML(>February</option>
+              <option value="3")HTML" +
+              String(conf.std.month == 3 ? " selected" : "") + R"HTML(>March</option>
+              <option value="4")HTML" +
+              String(conf.std.month == 4 ? " selected" : "") + R"HTML(>April</option>
+              <option value="5")HTML" +
+              String(conf.std.month == 5 ? " selected" : "") + R"HTML(>May</option>
+              <option value="6")HTML" +
+              String(conf.std.month == 6 ? " selected" : "") + R"HTML(>June</option>
+              <option value="7")HTML" +
+              String(conf.std.month == 7 ? " selected" : "") + R"HTML(>July</option>
+              <option value="8")HTML" +
+              String(conf.std.month == 8 ? " selected" : "") + R"HTML(>August</option>
+              <option value="9")HTML" +
+              String(conf.std.month == 9 ? " selected" : "") + R"HTML(>September</option>
+              <option value="10")HTML" +
+              String(conf.std.month == 10 ? " selected" : "") + R"HTML(>October</option>
+              <option value="11")HTML" +
+              String(conf.std.month == 11 ? " selected" : "") + R"HTML(>November</option>
+              <option value="12")HTML" +
+              String(conf.std.month == 12 ? " selected" : "") + R"HTML(>December</option>
             </select><br>
             <label for="stdHour">Hour:</label>
-            <input type="number" id="stdHour" name="stdHour" min="0" max="23" value=")" +
-              String(conf.std.hour) + R"("><br>
+            <input type="number" id="stdHour" name="stdHour" min="0" max="23" value=")HTML" +
+              String(conf.std.hour) + R"HTML("><br>
             <label for="stdOffset">Offset:</label>
-            <input type="number" id="stdOffset" name="stdOffset" value=")" +
-              String(conf.std.offset) + R"("><br>
+            <input type="number" id="stdOffset" name="stdOffset" value=")HTML" +
+              String(conf.std.offset) + R"HTML("><br>
             <h3>Daylight Saving Time</h3>
             <label for="dltAbbrev">Abbreviation:</label>
-            <input type="text" id="dltAbbrev" name="dltAbbrev" value=")" +
-              String(conf.dlt.abbrev) + R"("><br>
+            <input type="text" id="dltAbbrev" name="dltAbbrev" value=")HTML" +
+              String(conf.dlt.abbrev) + R"HTML("><br>
             <label for="dltWeek">Week:</label>
             <select id="dltWeek" name="dltWeek">
-              <option value="1")" +
-              String(conf.dlt.week == 1 ? " selected" : "") + R"(>First</option>
-              <option value="2")" +
-              String(conf.dlt.week == 2 ? " selected" : "") + R"(>Second</option>
-              <option value="3")" +
-              String(conf.dlt.week == 3 ? " selected" : "") + R"(>Third</option>
-              <option value="4")" +
-              String(conf.dlt.week == 4 ? " selected" : "") + R"(>Fourth</option>
-              <option value="0")" +
-              String(conf.dlt.week == 0 ? " selected" : "") + R"(>Last</option>
+              <option value="1")HTML" +
+              String(conf.dlt.week == 1 ? " selected" : "") + R"HTML(>First</option>
+              <option value="2")HTML" +
+              String(conf.dlt.week == 2 ? " selected" : "") + R"HTML(>Second</option>
+              <option value="3")HTML" +
+              String(conf.dlt.week == 3 ? " selected" : "") + R"HTML(>Third</option>
+              <option value="4")HTML" +
+              String(conf.dlt.week == 4 ? " selected" : "") + R"HTML(>Fourth</option>
+              <option value="0")HTML" +
+              String(conf.dlt.week == 0 ? " selected" : "") + R"HTML(>Last</option>
             </select><br>
             <label for="dltDOW">Day of Week:</label>
             <select id="dltDOW" name="dltDOW">
-              <option value="1")" +
-              String(conf.dlt.dow == 1 ? " selected" : "") + R"(>Sunday</option>
-              <option value="2")" +
-              String(conf.dlt.dow == 2 ? " selected" : "") + R"(>Monday</option>
-              <option value="3")" +
-              String(conf.dlt.dow == 3 ? " selected" : "") + R"(>Tuesday</option>
-              <option value="4")" +
-              String(conf.dlt.dow == 4 ? " selected" : "") + R"(>Wednesday</option>
-              <option value="5")" +
-              String(conf.dlt.dow == 5 ? " selected" : "") + R"(>Thursday</option>
-              <option value="6")" +
-              String(conf.dlt.dow == 6 ? " selected" : "") + R"(>Friday</option>
-              <option value="7")" +
-              String(conf.dlt.dow == 7 ? " selected" : "") + R"(>Saturday</option>
+              <option value="1")HTML" +
+              String(conf.dlt.dow == 1 ? " selected" : "") + R"HTML(>Sunday</option>
+              <option value="2")HTML" +
+              String(conf.dlt.dow == 2 ? " selected" : "") + R"HTML(>Monday</option>
+              <option value="3")HTML" +
+              String(conf.dlt.dow == 3 ? " selected" : "") + R"HTML(>Tuesday</option>
+              <option value="4")HTML" +
+              String(conf.dlt.dow == 4 ? " selected" : "") + R"HTML(>Wednesday</option>
+              <option value="5")HTML" +
+              String(conf.dlt.dow == 5 ? " selected" : "") + R"HTML(>Thursday</option>
+              <option value="6")HTML" +
+              String(conf.dlt.dow == 6 ? " selected" : "") + R"HTML(>Friday</option>
+              <option value="7")HTML" +
+              String(conf.dlt.dow == 7 ? " selected" : "") + R"HTML(>Saturday</option>
             </select><br>
             <label for="dltMonth">Month:</label>
             <select id="dltMonth" name="dltMonth">
-              <option value="1")" +
-              String(conf.dlt.month == 1 ? " selected" : "") + R"(>January</option>
-              <option value="2")" +
-              String(conf.dlt.month == 2 ? " selected" : "") + R"(>February</option>
-              <option value="3")" +
-              String(conf.dlt.month == 3 ? " selected" : "") + R"(>March</option>
-              <option value="4")" +
-              String(conf.dlt.month == 4 ? " selected" : "") + R"(>April</option>
-              <option value="5")" +
-              String(conf.dlt.month == 5 ? " selected" : "") + R"(>May</option>
-              <option value="6")" +
-              String(conf.dlt.month == 6 ? " selected" : "") + R"(>June</option>
-              <option value="7")" +
-              String(conf.dlt.month == 7 ? " selected" : "") + R"(>July</option>
-              <option value="8")" +
-              String(conf.dlt.month == 8 ? " selected" : "") + R"(>August</option>
-              <option value="9")" +
-              String(conf.dlt.month == 9 ? " selected" : "") + R"(>September</option>
-              <option value="10")" +
-              String(conf.dlt.month == 10 ? " selected" : "") + R"(>October</option>
-              <option value="11")" +
-              String(conf.dlt.month == 11 ? " selected" : "") + R"(>November</option>
-              <option value="12")" +
-              String(conf.dlt.month == 12 ? " selected" : "") + R"(>December</option>
+              <option value="1")HTML" +
+              String(conf.dlt.month == 1 ? " selected" : "") + R"HTML(>January</option>
+              <option value="2")HTML" +
+              String(conf.dlt.month == 2 ? " selected" : "") + R"HTML(>February</option>
+              <option value="3")HTML" +
+              String(conf.dlt.month == 3 ? " selected" : "") + R"HTML(>March</option>
+              <option value="4")HTML" +
+              String(conf.dlt.month == 4 ? " selected" : "") + R"HTML(>April</option>
+              <option value="5")HTML" +
+              String(conf.dlt.month == 5 ? " selected" : "") + R"HTML(>May</option>
+              <option value="6")HTML" +
+              String(conf.dlt.month == 6 ? " selected" : "") + R"HTML(>June</option>
+              <option value="7")HTML" +
+              String(conf.dlt.month == 7 ? " selected" : "") + R"HTML(>July</option>
+              <option value="8")HTML" +
+              String(conf.dlt.month == 8 ? " selected" : "") + R"HTML(>August</option>
+              <option value="9")HTML" +
+              String(conf.dlt.month == 9 ? " selected" : "") + R"HTML(>September</option>
+              <option value="10")HTML" +
+              String(conf.dlt.month == 10 ? " selected" : "") + R"HTML(>October</option>
+              <option value="11")HTML" +
+              String(conf.dlt.month == 11 ? " selected" : "") + R"HTML(>November</option>
+              <option value="12")HTML" +
+              String(conf.dlt.month == 12 ? " selected" : "") + R"HTML(>December</option>
             </select><br>
             <label for="dltHour">Hour:</label>
-            <input type="number" id="dltHour" name="dltHour" min="0" max="23" value=")" +
-              String(conf.dlt.hour) + R"("><br>
+            <input type="number" id="dltHour" name="dltHour" min="0" max="23" value=")HTML" +
+              String(conf.dlt.hour) + R"HTML("><br>
             <label for="dltOffset">Offset:</label>
-            <input type="number" id="dltOffset" name="dltOffset" value=")" +
-              String(conf.dlt.offset) + R"("><br>
+            <input type="number" id="dltOffset" name="dltOffset" value=")HTML" +
+              String(conf.dlt.offset) + R"HTML("><br>
             <input type="submit" value="Save Timezone Settings">
           </div>
         </form>
@@ -332,11 +332,11 @@ void handleSettings() {
             <div class="section">
               <h2>Additional Settings</h2>
               <div class="checkbox-container">
-                <input type="checkbox" id="buzzSound" name="buzzSound")" + String(conf.buzzSound ? " checked " : "") + R"()>
+                <input type="checkbox" id="buzzSound" name="buzzSound")HTML" + String(conf.buzzSound ? " checked " : "") + R"HTML()>
                 <label for="buzzSound">Buzzer Sound</label>
               </div>
               <div class="checkbox-container">
-                <input type="checkbox" id="fahrenheit" name="fahrenheit")" + String(conf.fahrenheit ? " checked " : "") + R"()>
+                <input type="checkbox" id="fahrenheit" name="fahrenheit")HTML" + String(conf.fahrenheit ? " checked " : "") + R"HTML()>
                 <label for="fahrenheit">Temperature in Fahrenheit</label>
               </div>
               <input type="submit" value="Save Additional Settings" class="button">
@@ -345,7 +345,7 @@ void handleSettings() {
         </form>
       </body>
       </html>
-    )";
+    )HTML";
 
     server.send(200, "text/html", html);
 }
@@ -434,6 +434,11 @@ void handleToggleScreen() {
 }
 
 void handleUpdateTime() {
+  wifi_connetion();
+  set_NTP_time();
+  Serial.println("Disconnecting from WiFi.\n");
+  WiFi.disconnect();
+
   if (server.method() == HTTP_POST) {
     server.sendHeader("Location", "/settings", true);
     server.send(302, "text/plain", "Redirecting to /");
@@ -442,9 +447,6 @@ void handleUpdateTime() {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
     return;
   }
-  wifi_connetion();
-  set_NTP_time();
-  WiFi.disconnect();
 }
 
 void handleHome() {
@@ -491,9 +493,12 @@ void handleHome() {
       }
       h2 {
         text-align: center;
-        font-size: 2em;
         color: white;
         margin-bottom: 20px;
+        margin-top: 0;
+        font-size: 2em;
+        border-bottom: 1px solid #555;
+        padding-bottom: 10px;
       }
       .container {
         max-width: 600px;
