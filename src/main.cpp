@@ -128,7 +128,9 @@ void setup() {
 
     Serial.printf("Button pressed. Trying to sync time with NTP server.\n");
 
+    wifi_connetion();
     set_NTP_time();
+    WiFi.disconnect();
   }
 
   matrix->setZone(0, 7, 7);

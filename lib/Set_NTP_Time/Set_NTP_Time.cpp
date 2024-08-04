@@ -5,27 +5,23 @@
 
 #include "Set_NTP_Time.h"
 
-void set_NTP_time() {
+void wifi_connetion() {
   /**
-   * @brief SET NTP TIME
-   * tries to sync the RTC time with NTP server
+   * @brief WIFI CONNECTION
+   * 
+   * tries to connect to a wifi network
+   * if no network is set, it tries to connect to an open access point
    */
 
-  WiFiUDP ntpUDP;
-  NTPClient timeClient(ntpUDP, conf.ntpServer);
   uint8_t n_net = WiFi.scanNetworks();
-
-  char ssid[256];
-  strlcpy(ssid, conf.wifi.SSID, sizeof(ssid));
 
   if(strcmp(conf.wifi.SSID, "") == 0) {
     bool open_ap_found = false;
 
     if (n_net) {
-      Serial.println("Network found!\n");
       for (uint8_t i = 0; i < n_net; ++i)
         if(WiFi.encryptionType(i) == WIFI_AUTH_OPEN) {
-          strlcpy(ssid, WiFi.SSID(i).c_str(), sizeof(ssid));
+          strlcpy(conf.wifi.SSID, WiFi.SSID(i).c_str(), sizeof(conf.wifi.SSID));
           open_ap_found = true;
           break;
         }
@@ -34,8 +30,8 @@ void set_NTP_time() {
       Serial.println("No network found.\n");
 
     if(open_ap_found) {
-      WiFi.begin(ssid);
-      Serial.printf("Connecting to %s ", ssid);
+      WiFi.begin(conf.wifi.SSID);
+      Serial.printf("Connecting to %s ", conf.wifi.SSID);
     }
     else {
       Serial.println("No open network found.\n");
@@ -51,13 +47,28 @@ void set_NTP_time() {
     Serial.printf("Connecting to %s ", conf.wifi.SSID);
   }
 
-  while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED)
+  while(WiFi.status() != WL_CONNECTED && WiFi.status() != WL_CONNECT_FAILED) {
+    Serial.print(".");
     delay(100);
+  }
 
-  if(WiFi.status() == WL_CONNECT_FAILED)
-    Serial.printf("\nError connecting to %s.\n", ssid);
+  if(WiFi.status() != WL_CONNECT_FAILED) {
+    Serial.printf("\nConnected to %s.\n", conf.wifi.SSID);
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+  }
+  else
+    Serial.printf("\nError connecting to %s.\n", conf.wifi.SSID);
+}
 
-  Serial.printf("\nConnected to %s.\n", ssid);
+void set_NTP_time() {
+  /**
+   * @brief SET NTP TIME
+   * tries to sync the RTC time with NTP server
+  */
+
+  WiFiUDP ntpUDP;
+  NTPClient timeClient(ntpUDP, conf.ntpServer);
 
   timeClient.begin();
   delay(50);
@@ -66,12 +77,10 @@ void set_NTP_time() {
 
   if(timeClient.isTimeSet()) {
     rtc.adjust(timeClient.getEpochTime());
-    Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", ssid);
+    Serial.printf("RTC adjusted with NTP time.\nDisconnecting from %s.\n", conf.wifi.SSID);
   }
   else {
     Serial.printf("NTP server error. Time not set.\n");
-    rtc.adjust(DateTime("Jan 1 1970", "00:00:00"));
+    rtc.adjust(DateTime(uint32_t(0)));
   }
-
-  WiFi.disconnect();
 }

@@ -442,7 +442,9 @@ void handleUpdateTime() {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
     return;
   }
+  wifi_connetion();
   set_NTP_time();
+  WiFi.disconnect();
 }
 
 void handleHome() {

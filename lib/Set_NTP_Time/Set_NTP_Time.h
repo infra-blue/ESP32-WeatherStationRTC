@@ -9,6 +9,7 @@
 extern Config conf;
 extern RTC_DS3231 rtc;
 
+void wifi_connetion();
 void set_NTP_time();
 
 #endif
