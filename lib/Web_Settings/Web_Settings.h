@@ -1,5 +1,5 @@
-#ifndef WEBSETTINGS_H
-#define WEBSETTINGS_H
+#ifndef WEB_SETTINGS_H
+#define WEB_SETTINGS_H
 
 #include <Arduino.h>
 #include <FS.h>

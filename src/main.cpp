@@ -25,7 +25,7 @@
 #include <Macros.h>
 
 #include <Config_Parser.h>
-#include <WebSettings.h>
+#include <Web_Settings.h>
 #include <Languages.h>
 #include <Font_Data.h>
 #include <Screens.h>
