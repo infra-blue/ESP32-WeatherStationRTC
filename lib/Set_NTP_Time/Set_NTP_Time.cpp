@@ -6,13 +6,6 @@
 #include "Set_NTP_Time.h"
 
 void wifi_connetion() {
-  /**
-   * @brief WIFI CONNECTION
-   * 
-   * tries to connect to a wifi network
-   * if no network is set, it tries to connect to an open access point
-   */
-
   uint8_t n_net = WiFi.scanNetworks();
 
   if(strcmp(conf.wifi.SSID, "") == 0) {
@@ -63,11 +56,6 @@ void wifi_connetion() {
 }
 
 void set_NTP_time() {
-  /**
-   * @brief SET NTP TIME
-   * tries to sync the RTC time with NTP server
-  */
-
   WiFiUDP ntpUDP;
   NTPClient timeClient(ntpUDP, conf.ntpServer);
 

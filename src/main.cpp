@@ -72,6 +72,9 @@ void setup() {
   server.on("/settings", handleSettings);
   server.on("/updateTime", HTTP_POST, handleUpdateTime);
   server.on("/toggleScreen", HTTP_POST, handleToggleScreen);
+  server.on("/timeTempScreen", HTTP_POST, handleTimeTempScreen);
+  server.on("/dateScreen", HTTP_POST, handleDateScreen);
+  server.on("/humPresScreen", HTTP_POST, handleHumPresScreen);
   server.on("/submitNetwork", HTTP_POST, handleNetworkSubmit);
   server.on("/submitNTP", HTTP_POST, handleNTPSubmit);
   server.on("/submitLanguage", HTTP_POST, handleLanguageSubmit);
@@ -195,6 +198,9 @@ void loop() {
       break;
     case HUMIDITY_PRESSURE:
       print_hum_pres();
+      break;
+    default:
+      print_time_temp();
       break;
   }
 

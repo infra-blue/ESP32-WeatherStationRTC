@@ -22,19 +22,19 @@ void handleHome() {
   sprintf(second, "%02d", current_time.second());
 
   String html = R"HTML(
-    <!DOCTYPE html>
+  <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Home</title>
+      <title>ESP32 Home</title>
       <style>
         body {
           font-family: Arial, sans-serif;
-          background-color: #222;
-          color: #fff;
           margin: 0;
           padding: 20px;
+          background-color: #222;
+          color: #fff;
         }
         h1 {
           text-align: center;
@@ -42,29 +42,46 @@ void handleHome() {
           color: white;
           margin-bottom: 20px;
         }
-        h2 {
-          text-align: center;
-          color: white;
-          margin-bottom: 20px;
-          margin-top: 0;
-          font-size: 2em;
-          border-bottom: 1px solid #555;
-          padding-bottom: 10px;
-        }
-        .container {
+        form {
+          margin-top: 20px;
           max-width: 600px;
           margin-left: auto;
           margin-right: auto;
           background-color: rgba(50, 50, 50, 0.8);
           padding: 20px;
           border-radius: 8px;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
-        .section {
-          margin-bottom: 20px;
-          padding: 10px;
-          border-radius: 8px;
-          background-color: #444;
+        .button-row {
+          display: flex;
+          justify-content: space-between;
+          max-width: 640px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .button-row form {
+          flex: 1;
+          margin-right: 10px;
+        }
+        .button-row form:last-child {
+          margin-right: 0;
+        }
+        .button-row input[type="submit"] {
+          width: 100%;
+        }
+        input[type="submit"] {
+          background-color: #007bff;
+          color: white;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          display: block;
+          margin-left: 0;
+          margin-right: auto;
+          width: 100%;
+        }
+        input[type="submit"]:hover {
+          background-color: #0056b3;
         }
         p {
           font-size: 18px;
@@ -76,85 +93,73 @@ void handleHome() {
           font-weight: bold;
           color: #03dac6;
         }
-        .button {
-          display: block;
-          width: 100%;
-          padding: 10px 20px;
-          font-size: 18px;
-          color: white;
-          background-color: #007bff;
-          border: none;
-          border-radius: 5px;
-          text-decoration: none;
-          margin-top: 20px;
+        .section {
+          margin-bottom: 10px;
+          padding: 10px;
+          border-radius: 8px;
+          background-color: #444;
+        }
+        .section h2 {
           text-align: center;
-          box-sizing: border-box; /* Ensure padding is included in the width */
-        }
-        .button-container {
-          text-align: center; /* Center align the button container */
-        }
-        .button:hover {
-          background-color: #0056b3;
+          margin-top: 0;
+          font-size: 1.6em;
+          border-bottom: 1px solid #555;
+          padding-bottom: 10px;
         }
         @media (max-width: 600px) {
-          .container {
-            margin-bottom: 20px;
-            padding: 20px;
-            border-radius: 8px;
-            background-color: rgba(50, 50, 50, 0.8);
-          }
           h1 {
-            font-size: 2em;
-          }
-          h2 {
-            font-size: 1.5em;
-          }
-          p {
-            font-size: 16px;
-          }
-          .button {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
+            font-size: 1.8em;
           }
           .button-row {
-            flex-direction: column;
+            flex-direction: row;
             flex-wrap: nowrap;
             gap: 10px;
           }
           .button-row form {
             margin-right: 0;
-            margin-bottom: 10px;
             flex: 1;
           }
           .button-row form:last-child {
             margin-bottom: 0;
+          }
+          p {
+          font-size: 16px;
           }
         }
       </style>
     </head>
     <body>
     <h1><strong>ESP32 WeatherStation</strong> Home</h1>
-    <div class="container">
-      <div class="section">
-        <h2>Sensor Data</h2>
-        <p>Temperature: <span class="data">)HTML" + temperatureValue + " " + temperatureUnit + R"HTML(</span></p>
-        <p>Humidity: <span class="data">)HTML" + String(humidity) + R"HTML( %</span></p>
-        <p>Pressure: <span class="data">)HTML" + String(pressure) + R"HTML( hPa</span></p>
+      <div class="button-row">
+        <form action="/timeTempScreen" method="post">
+          <input type="submit" value="Time">
+        </form>
+        <form action="/dateScreen" method="post">
+          <input type="submit" value="Date">
+        </form>
+        <form action="/humPresScreen" method="post">
+          <input type="submit" value="Env">
+        </form>
       </div>
-      <div class="section">
-        <h2>Date and Time</h2>
-        <p>Date: <span class="data">)HTML" + String(day) + "/" + String(month) + "/" + String(year) + R"HTML(</span></p>
-        <p>Time: <span class="data">)HTML" + String(hour) + ":" + String(minute) + ":" + String(second) + R"HTML(</span></p>
-      </div>
-      <div class="button-container">
-        <a href='/settings' class="button">Settings</a>
-      </div>
-    </div>
+      <form action="/toggleScreen" method="post">
+        <input type="submit" value=")HTML" +
+        String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"HTML(">
+      </form>
+      <form action="/settings" method="get">
+        <div class="section">
+          <h2>Sensor Data</h2>
+          <p>Temperature: <span class="data">)HTML" + temperatureValue + " " + temperatureUnit + R"HTML(</span></p>
+          <p>Humidity: <span class="data">)HTML" + String(humidity) + R"HTML( %</span></p>
+          <p>Pressure: <span class="data">)HTML" + String(pressure) + R"HTML( hPa</span></p>
+          <h2>Date and Time</h2>
+          <p>Date: <span class="data">)HTML" + String(day) + "/" + String(month) + "/" + String(year) + R"HTML(</span></p>
+          <p>Time: <span class="data">)HTML" + String(hour) + ":" + String(minute) + ":" + String(second) + R"HTML(</span></p>
+          <input type="submit" value="Settings">
+        </div>
+      </form>
   </body>
   </html>
   )HTML";
-
   server.send(200, "text/html", html);
 }
 
@@ -198,7 +203,7 @@ void handleSettings() {
             select,
             input[type="number"],
             input[type="password"] {
-              width: calc(100% - 22px);
+              width: 100%;
               padding: 10px;
               margin-bottom: 10px;
               border: 1px solid #ccc;
@@ -264,6 +269,9 @@ void handleSettings() {
               margin-right: 0;
             }
             @media (max-width: 600px) {
+              h1 {
+                font-size: 1.8em;
+              }
               .button-row {
                 flex-direction: row;
                 flex-wrap: nowrap;
@@ -281,15 +289,9 @@ void handleSettings() {
         </head>
         <body>
       <h1><strong>ESP32 WeatherStation</strong> Settings</h1>
-      <div class="button-row">
-        <form action="/" method="get">
-          <input type="submit" value="Home">
-        </form>
-        <form action="/toggleScreen" method="post">
-          <input type="submit" value=")HTML" +
-          String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"HTML(">
-        </form>
-      </div>
+      <form action="/" method="get">
+        <input type="submit" value="Home">
+      </form>
       <!-- Network Settings Form -->
       <form action="/submitNetwork" method="post">
         <div class="section">
@@ -502,13 +504,43 @@ void handleSettings() {
   server.send(200, "text/html", html);
 }
 
+void handleTimeTempScreen() {
+  displaySelector = 0;
+  server.sendHeader("Location", "/", true);
+  server.send(302, "text/plain", "Redirecting to /");
+}
+
+void handleDateScreen() {
+  displaySelector = 1;
+  server.sendHeader("Location", "/", true);
+  server.send(302, "text/plain", "Redirecting to /");
+}
+
+void handleHumPresScreen() {
+  displaySelector = 2;
+  server.sendHeader("Location", "/", true);
+  server.send(302, "text/plain", "Redirecting to /");
+}
+
+void handleToggleScreen() {
+  screen_off = !screen_off;
+
+  if (screen_off)
+    matrix->displayShutdown(true);
+  else
+    matrix->displayShutdown(false);
+
+  server.sendHeader("Location", "/", true);
+  server.send(302, "text/plain", "Redirecting to /");
+}
+
 void handleNetworkSubmit() {
   if (server.method() == HTTP_POST) {
     strncpy(conf.wifi.SSID, server.arg("ssid").c_str(), sizeof(conf.wifi.SSID) - 1);
     strncpy(conf.wifi.PASSWORD, server.arg("password").c_str(), sizeof(conf.wifi.PASSWORD) - 1);
     storeConfiguration(conf);
     server.sendHeader("Location", "/settings", true);
-    server.send(302, "text/plain", "Redirecting to /");
+    server.send(302, "text/plain", "Redirecting to /settings");
   } else {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
   }
@@ -519,7 +551,7 @@ void handleNTPSubmit() {
     strncpy(conf.ntpServer, server.arg("ntpServer").c_str(), sizeof(conf.ntpServer) - 1);
     storeConfiguration(conf);
     server.sendHeader("Location", "/settings", true);
-    server.send(302, "text/plain", "Redirecting to /");
+    server.send(302, "text/plain", "Redirecting to /settings");
   } else {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
   }
@@ -530,7 +562,7 @@ void handleLanguageSubmit() {
     strncpy(conf.language, server.arg("language").c_str(), sizeof(conf.language) - 1);
     storeConfiguration(conf);
     server.sendHeader("Location", "/settings", true);
-    server.send(302, "text/plain", "Redirecting to /");
+    server.send(302, "text/plain", "Redirecting to /settings");
   } else {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
   }
@@ -538,7 +570,6 @@ void handleLanguageSubmit() {
 
 void handleTimezoneSubmit() {
   if (server.method() == HTTP_POST) {
-    // Update timezone configuration from POST data
     strncpy(conf.std.abbrev, server.arg("stdAbbrev").c_str(), sizeof(conf.std.abbrev) - 1);
     conf.std.abbrev[sizeof(conf.std.abbrev) - 1] = '\0';  // Null-terminate the string
     conf.std.week = server.arg("stdWeek").toInt();
@@ -555,7 +586,7 @@ void handleTimezoneSubmit() {
     conf.dlt.offset = server.arg("dltOffset").toInt();
     storeConfiguration(conf);
     server.sendHeader("Location", "/settings", true);
-    server.send(302, "text/plain", "Redirecting to /");
+    server.send(302, "text/plain", "Redirecting to /settings");
   } else {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
   }
@@ -567,22 +598,10 @@ void handleAdditionalSubmit() {
     conf.fahrenheit = server.hasArg("fahrenheit");
     storeConfiguration(conf);
     server.sendHeader("Location", "/settings", true);
-    server.send(302, "text/plain", "Redirecting to /");
+    server.send(302, "text/plain", "Redirecting to /settings");
   } else {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");
   }
-}
-
-void handleToggleScreen() {
-  screen_off = !screen_off;
-
-  if (screen_off)
-    matrix->displayShutdown(true);
-  else
-    matrix->displayShutdown(false);
-
-  server.sendHeader("Location", "/settings", true);
-  server.send(302, "text/plain", "Redirecting to /");
 }
 
 void handleUpdateTime() {
@@ -593,7 +612,7 @@ void handleUpdateTime() {
 
   if (server.method() == HTTP_POST) {
     server.sendHeader("Location", "/settings", true);
-    server.send(302, "text/plain", "Redirecting to /");
+    server.send(302, "text/plain", "Redirecting to /settings");
   }
   else {
     server.send(405, "text/html", "<html><body><h1>Method Not Allowed</h1></body></html>");

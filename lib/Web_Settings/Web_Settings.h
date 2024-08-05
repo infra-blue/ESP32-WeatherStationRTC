@@ -21,6 +21,7 @@ extern MD_Parola* matrix;
 extern Adafruit_BME280 bme;
 extern RTC_DS3231 rtc;
 extern DateTime current_time;
+extern uint8_t displaySelector;
 
 void handleHome();
 void handleSettings();
@@ -30,6 +31,9 @@ void handleLanguageSubmit();
 void handleTimezoneSubmit();
 void handleAdditionalSubmit();
 void handleToggleScreen();
+void handleTimeTempScreen();
+void handleDateScreen();
+void handleHumPresScreen();
 void handleUpdateTime();
 
 #endif

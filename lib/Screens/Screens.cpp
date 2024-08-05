@@ -11,20 +11,6 @@
 #include "Screens.h"
 
 void print_time_temp() {
-  /**
-  * @brief TIME AND TEMPERATURE
-  *  picks up the current time from RTC (which is in DateTime class)
-  *  converts it to epochtime
-  *  then to local time
-  *  then prints the time on the matrix display
-  *  formatted as HH:MM SS
-  * 
-  *  then picks up the temperature from BME280 sensor
-  *  and prints it on the matrix display
-  * 
-  *  the seconds are blinking every second
-  */
-
   char hh_mm[6];
   char ss[3];
   char temp[10];
@@ -36,7 +22,6 @@ void print_time_temp() {
   else
     sprintf(temp, "%3.1f °F", (bme.readTemperature() * (9.0 / 5.0)) + 32.0);
 
-  //print time and temperature
   matrix->synchZoneStart();
   if(matrix->displayAnimate()) {
     matrix->displayZoneText(0, ss, PA_CENTER, 75, 0, PA_PRINT);
@@ -46,21 +31,12 @@ void print_time_temp() {
 }
 
 void print_date() {
-  /**
-  * @brief DATE
-  * picks up the current time from RTC (which is in DateTime class)
-  * converts it to epochtime
-  * then to local time
-  * then prints the date on the matrix display
-  * formatted as DDD DD MMM YYYY
-  */
   char ddd_dd[7];
   char mmm_yyyy[9];
 
   sprintf(ddd_dd, "%s %02d", days[std::string(conf.language)][current_time.dayOfTheWeek()], current_time.day());
   sprintf(mmm_yyyy, "%s %d", months[std::string(conf.language)][current_time.month() - 1], current_time.year());
 
-  //print date
   matrix->synchZoneStart();
   if(matrix->displayAnimate()) {
     matrix->displayZoneText(3, ddd_dd, PA_CENTER, 75, 0, PA_PRINT);
@@ -69,13 +45,6 @@ void print_date() {
 }
 
 void print_hum_pres() {
-  /**
-  * @brief HUMIDITY AND PRESSURE
-  * picks up the current humidity and pressure from BME280 sensor
-  * then prints the humidity and pressure on the matrix display
-  * formatted as HHH.H% and PPPP.P
-  */
-
   char hum[9];
   char pres[9];
 
