@@ -26,7 +26,11 @@
 </p>
 
 <div align="center">
-  <img src="assets/clock.gif" alt="Weather Station">
+
+  ![desktop](assets/desktop.jpg)
+
+  ![image](assets/clock.gif)
+
 </div>
 
 This project is an ESP32-based desk clock with functionality of monitoring the temperature, atmospheric pressure and humidity in the air. The display is auto dimmed. It is coded using the arduino framework.
@@ -86,12 +90,18 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 
    - The reference board is an ESP32-DevKitC V4
 
+<div align= center>
+
 | PushButton | ESP32-DevKitC V4 |
 | ----------- | ----------- |
 |  + | 0 |
 |  - | GND |
 
+</div>
+
 **N.B.** The PIN 0 is the one used by the BOOT button on the ESP32-DevKitC V4 devboard so it's not necessary using an external push button.
+
+<div align= center>
 
 | Buzzer | ESP32-DevKitC V4 |
 | ----------- | ----------- |
@@ -113,6 +123,8 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 | CLK | 18 |
 | DIN | 23 |
 | CS | 5 |
+
+</div>
 
 **N.B.** The two 4 devices displays needs to be connected like this:
 
@@ -158,17 +170,17 @@ at the ```10.10.10.10``` IP address.
 
 <div align="center">
 
-### Home page
+## Home page
 
-# ![Home](assets/home.png)
+![Home](assets/home.png)
 
 </div>
 
 <div align="center">
 
-### Settings page
+## Settings page
 
-# ![Settings](assets/settings.png)
+![Settings](assets/settings.png)
 
 </div>
 
