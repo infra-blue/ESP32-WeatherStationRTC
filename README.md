@@ -37,9 +37,11 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 - **Button Control:** A button allows cycling through the display modes and turning the display on/off with a long press.
 - **Web Server**: A web server for change the clock settings.
 
+## Requirements
+
 <div align="center">
 
-## Hardware Requirements
+### Hardware Requirements
 
 </div>
 
@@ -53,7 +55,7 @@ This project is an ESP32-based desk clock with functionality of monitoring the t
 
 <div align="center">
 
-## Software Requirements
+### Software Requirements
 
 </div>
 
