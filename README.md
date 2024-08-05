@@ -1,7 +1,24 @@
 # ESP32-WeatherStationRTC
 
 <p align="center">
-  <a href="https://www.codefactor.io/repository/github/infra-blue/esp32-weatherstationrtc/overview/main"><img src="https://www.codefactor.io/repository/github/infra-blue/esp32-weatherstationrtc/badge/main" alt="CodeFactor" /></a>
+  <a href="https://www.codefactor.io/repository/github/infra-blue/esp32-weatherstationrtc/overview/main"><img alt="CodeFactor Grade" src="https://img.shields.io/codefactor/grade/github/infra-blue/ESP32-WeatherStationRTC?style=for-the-badge&logo=codefactor&logoColor=white&label=Code%20Quality&color=red">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/commits><img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/t/infra-blue/ESP32-WeatherStationRTC?style=for-the-badge&logo=conventionalcommits&logoColor=white&label=Commits&color=blue">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/stargazers><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/infra-blue/ESP32-WeatherStationRTC?style=for-the-badge&logo=githubsponsors&logoColor=white&label=STARS&color=yellow">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/watchers><img alt="GitHub watchers" src="https://img.shields.io/github/watchers/infra-blue/ESP32-WeatherStationRTC?style=for-the-badge&logo=githubcopilot&logoColor=white&color=orange">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/actions/workflows/dependabot.yml><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/infra-blue/ESP32-WeatherStationRTC/dependabot.yml?style=for-the-badge&logo=dependabot&logoColor=white&label=platformIO%20dependabot&color=green">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/actions/workflows/platformio-build&release.yml><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/infra-blue/ESP32-WeatherStationRTC/platformio-build%26release.yml?style=for-the-badge&logo=platformio&logoColor=white&label=platformIO%20build&color=green">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/releases/latest><img alt="GitHub Downloads (all assets, all releases)" src="https://img.shields.io/github/downloads/infra-blue/ESP32-WeatherStationRTC/total?style=for-the-badge&logo=github&logoColor=white&label=Github%20Downloads&color=lightgrey">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/releases/latest><img alt="GitHub Release" src="https://img.shields.io/github/v/release/infra-blue/ESP32-WeatherStationRTC?include_prereleases&sort=date&display_name=tag&style=for-the-badge&logo=webpack&logoColor=white&label=Latest&logoColor=white&color=darkblue">
+  </a>
+  <a href=https://github.com/infra-blue/ESP32-WeatherStationRTC/blob/main/LICENSE><img alt="GitHub License" src="https://img.shields.io/github/license/infra-blue/ESP32-WeatherStationRTC?style=for-the-badge&logo=gitbook&logoColor=white">
+  </a>
 </p>
 
 <div align="center">
