@@ -1,4 +1,8 @@
+<div align = center>
+
 # ESP32-WeatherStationRTC
+
+</div>
 
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/infra-blue/esp32-weatherstationrtc/overview/main"><img alt="CodeFactor Grade" src="https://img.shields.io/codefactor/grade/github/infra-blue/ESP32-WeatherStationRTC?style=for-the-badge&logo=codefactor&logoColor=white&label=Code%20Quality&color=red">
