@@ -178,20 +178,7 @@ void setup() {
   printConfiguration(conf);
 }
 
-void loop()
-{
-  /**
-  * @brief MAIN LOOP
-  * updates the screen_button
-  * if the button is pressed, changes the displaySelector
-  * to display the time, date or humidity and pressure
-  * then sets the intensity of the matrix display
-  * 
-  * if the button is pressed for more than 500ms
-  * the display is turned off
-  * and turned on again when the button is pressed again
-  */
-
+void loop() {
   current_time = TMZ->toLocal((rtc.now()).unixtime());
   server.handleClient();
 
