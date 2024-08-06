@@ -1,6 +1,8 @@
 #ifndef CONFIG_PARSER_H
 #define CONFIG_PARSER_H
 
+#define PATH_TO_CONF "/config.json"
+
 #include <FS.h>
 #include <SPIFFS.h>
 #include <ArduinoJson.h>

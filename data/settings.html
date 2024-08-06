@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0">
+        <title>ESP32 Settings</title>
+        <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+              background-color: #222;
+              color: #fff;
+            }
+            h1 {
+              text-align: center;
+              font-size: 3em;
+              color: white;
+              margin-bottom: 20px;
+            }
+            form {
+              margin-top: 20px;
+              max-width: 600px;
+              margin-left: auto;
+              margin-right: auto;
+              background-color: rgba(50, 50, 50, 0.8);
+              padding: 20px;
+              border-radius: 8px;
+            }
+            label {
+              display: block;
+              margin-bottom: 10px;
+            }
+            input[type="text"],
+            select,
+            input[type="number"],
+            input[type="password"] {
+              width: 100%;
+              padding: 10px;
+              margin-bottom: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+              background-color: #444;
+              color: #fff;
+            }
+            .button-row {
+              display: flex;
+              justify-content: space-between;
+              max-width: 640px;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            .button-row form {
+              flex: 1;
+              margin-right: 10px;
+            }
+            .button-row form:last-child {
+              margin-right: 0;
+            }
+            .button-row input[type="submit"] {
+              width: 100%;
+            }
+            input[type="submit"] {
+              background-color: #007bff;
+              color: white;
+              padding: 10px 20px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              display: block;
+              margin-left: 0;
+              margin-right: auto;
+              width: 100%;
+            }
+            input[type="submit"]:hover {
+              background-color: #0056b3;
+            }
+            .section {
+              margin-bottom: 10px;
+              padding: 10px;
+              border-radius: 8px;
+              background-color: #444;
+            }
+            .section h2 {
+              margin-top: 0;
+              font-size: 1.2em;
+              border-bottom: 1px solid #555;
+              padding-bottom: 10px;
+            }
+            .checkbox-container {
+              display: flex;
+              align-items: center;
+              margin: 10px 0;
+            }
+            .checkbox-container label {
+              margin-left: 10px;
+              margin-bottom: 0;
+            }
+            .checkbox-container label:first-child {
+              margin-right: 0;
+            }
+            @media (max-width: 600px) {
+              h1 {
+                font-size: 1.8em;
+              }
+              .button-row {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                gap: 10px;
+              }
+              .button-row form {
+                margin-right: 0;
+                flex: 1;
+              }
+              .button-row form:last-child {
+                margin-bottom: 0;
+              }
+            }
+          </style>
+    </head>
+    <body>
+        <h1><strong>ESP32 WeatherStation</strong> Settings</h1>
+        <form action="/" method="get">
+            <input type="submit" value="Home">
+        </form>
+        <!-- Network Settings Form -->
+        <form action="/submitNetwork" method="post">
+            <div class="section">
+                <h2>Network Settings</h2>
+                <label for="ssid">SSID:</label>
+                <input type="text" id="ssid" name="ssid" value="{{ SSID }}"><br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" value><br>
+                <input type="submit" value="Save Network Settings">
+            </div>
+        </form>
+        <!-- NTP Server Form -->
+        <form action="/submitNTP" method="post">
+            <div class="section">
+                <h2>NTP Server Settings</h2>
+                <label for="ntpServer">NTP Server:</label>
+                <input type="text" id="ntpServer" name="ntpServer" value="{{ NTP_SERVER }}"><br>
+                <input type="submit" value="Save NTP Server">
+            </div>
+        </form>
+        <form action="/updateTime" method="post">
+            <div class="section">
+                <h2>Connect to WiFi to update the time</h2>
+                <input type="submit" value="Update Time">
+            </div>
+        </form>
+        <!-- Language Form -->
+        <form action="/submitLanguage" method="post">
+            <div class="section">
+                <h2>Language Settings</h2>
+                <label for="language">Language:</label>
+                <select id="language" name="language">
+                    <option value="en"{{ ENGLISH }}>English</option>
+                    <option value="it"{{ ITALIAN }}>Italian</option>
+                    <option value="es"{{ SPANISH }}>Spanish</option>
+                    <option value="de"{{ GERMAN }}>German</option>
+                    <option value="fr"{{ FRENCH }}>French</option>
+                </select><br>
+                <input type="submit" value="Save Language Settings">
+            </div>
+        </form>
+
+        <!-- Timezone Settings Form -->
+        <form action="/submitTimezone" method="post">
+            <div class="section">
+                <h2>Timezone Settings</h2>
+                <h3>Standard Time</h3>
+                <label for="stdAbbrev">Abbreviation:</label>
+                <input type="text" id="stdAbbrev" name="stdAbbrev" value="{{ STD_ABBREV }}"><br>
+                <label for="stdWeek">Week:</label>
+                <select id="stdWeek" name="stdWeek">
+                    <option value="1"{{ STD_WEEK_1 }}>First</option>
+                    <option value="2"{{ STD_WEEK_2 }}>Second</option>
+                    <option value="3"{{ STD_WEEK_3 }}>Third</option>
+                    <option value="4"{{ STD_WEEK_4 }}>Fourth</option>
+                    <option value="0"{{ STD_WEEK_0 }}>Last</option>
+                </select><br>
+                <label for="stdDOW">Day of Week:</label>
+                <select id="stdDOW" name="stdDOW">
+                    <option value="1"{{ STD_DOW_1 }}>Sunday</option>
+                    <option value="2"{{ STD_DOW_2 }}>Monday</option>
+                    <option value="3"{{ STD_DOW_3 }}>Tuesday</option>
+                    <option value="4"{{ STD_DOW_4 }}>Wednesday</option>
+                    <option value="5"{{ STD_DOW_5 }}>Thursday</option>
+                    <option value="6"{{ STD_DOW_6 }}>Friday</option>
+                    <option value="7"{{ STD_DOW_7 }}>Saturday</option>
+                </select><br>
+                <label for="stdMonth">Month:</label>
+                <select id="stdMonth" name="stdMonth">
+                    <option value="1"{{ STD_MONTH_1 }}>January</option>
+                    <option value="2"{{ STD_MONTH_2 }}>February</option>
+                    <option value="3"{{ STD_MONTH_3 }}>March</option>
+                    <option value="4"{{ STD_MONTH_4 }}>April</option>
+                    <option value="5"{{ STD_MONTH_5 }}>May</option>
+                    <option value="6"{{ STD_MONTH_6 }}>June</option>
+                    <option value="7"{{ STD_MONTH_7 }}>July</option>
+                    <option value="8"{{ STD_MONTH_8 }}>August</option>
+                    <option value="9"{{ STD_MONTH_9 }}>September</option>
+                    <option value="10"{{ STD_MONTH_10 }}>October</option>
+                    <option value="11"{{ STD_MONTH_11 }}>November</option>
+                    <option value="12"{{ STD_MONTH_12 }}>December</option>
+                </select><br>
+                <label for="stdHour">Hour:</label>
+                <input type="number" id="stdHour" name="stdHour" min="0" max="23" value="{{ STD_HOUR }}"><br>
+                <label for="stdOffset">Offset:</label>
+                <input type="number" id="stdOffset" name="stdOffset" value="{{ STD_OFFSET }}"><br>
+
+                <h3>Daylight Saving Time</h3>
+                <label for="dltAbbrev">Abbreviation:</label>
+                <input type="text" id="dltAbbrev" name="dltAbbrev" value="{{ DLT_ABBREV }}"><br>
+                <label for="dltWeek">Week:</label>
+                <select id="dltWeek" name="dltWeek">
+                    <option value="1"{{ DLT_WEEK_1 }}>First</option>
+                    <option value="2"{{ DLT_WEEK_2 }}>Second</option>
+                    <option value="3"{{ DLT_WEEK_3 }}>Third</option>
+                    <option value="4"{{ DLT_WEEK_4 }}>Fourth</option>
+                    <option value="0"{{ DLT_WEEK_0 }}>Last</option>
+                </select><br>
+                <label for="dltDOW">Day of Week:</label>
+                <select id="dltDOW" name="dltDOW">
+                    <option value="1"{{ DLT_DOW_1 }}>Sunday</option>
+                    <option value="2"{{ DLT_DOW_2 }}>Monday</option>
+                    <option value="3"{{ DLT_DOW_3 }}>Tuesday</option>
+                    <option value="4"{{ DLT_DOW_4 }}>Wednesday</option>
+                    <option value="5"{{ DLT_DOW_5 }}>Thursday</option>
+                    <option value="6"{{ DLT_DOW_6 }}>Friday</option>
+                    <option value="7"{{ DLT_DOW_7 }}>Saturday</option>
+                </select><br>
+                <label for="dltMonth">Month:</label>
+                <select id="dltMonth" name="dltMonth">
+                    <option value="1"{{ DLT_MONTH_1 }}>January</option>
+                    <option value="2"{{ DLT_MONTH_2 }}>February</option>
+                    <option value="3"{{ DLT_MONTH_3 }}>March</option>
+                    <option value="4"{{ DLT_MONTH_4 }}>April</option>
+                    <option value="5"{{ DLT_MONTH_5 }}>May</option>
+                    <option value="6"{{ DLT_MONTH_6 }}>June</option>
+                    <option value="7"{{ DLT_MONTH_7 }}>July</option>
+                    <option value="8"{{ DLT_MONTH_8 }}>August</option>
+                    <option value="9"{{ DLT_MONTH_9 }}>September</option>
+                    <option value="10"{{ DLT_MONTH_10 }}>October</option>
+                    <option value="11"{{ DLT_MONTH_11 }}>November</option>
+                    <option value="12"{{ DLT_MONTH_12 }}>December</option>
+                </select><br>
+                <label for="dltHour">Hour:</label>
+                <input type="number" id="dltHour" name="dltHour" min="0" max="23" value="{{ DLT_HOUR }}"><br>
+                <label for="dltOffset">Offset:</label>
+                <input type="number" id="dltOffset" name="dltOffset" value="{{ DLT_OFFSET }}"><br>
+                <input type="submit" value="Save Timezone Settings">
+            </div>
+        </form>
+
+        <!-- Additional Settings Form -->
+        <form action="/submitAdditional" method="post">
+            <div class="container">
+                <div class="section">
+                    <h2>Additional Settings</h2>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="buzzSound"name="buzzSound" {{ BUZZ_SOUND }}>
+                        <label for="buzzSound">Buzzer Sound</label>
+                    </div>
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="fahrenheit" name="fahrenheit" {{ FAHRENHEIT }}>
+                        <label for="fahrenheit">Temperature in Fahrenheit</label>
+                    </div>
+                    <input type="submit" value="Save Additional Settings"
+                        class="button">
+                </div>
+            </div>
+        </form>
+    </body>
+</html>

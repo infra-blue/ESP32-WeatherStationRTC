@@ -35,6 +35,8 @@
 
 Config conf;
 WebServer server(80);
+String HOME_HTML;
+String SETTINGS_HTML;
 
 MD_Parola* matrix = nullptr;
 RTC_DS3231 rtc;
@@ -70,6 +72,9 @@ void setup() {
   IPAddress gateway(GATEWAY);
   IPAddress subnet(SUBNET);
   WiFi.softAPConfig(local_IP, gateway, subnet);
+
+  HOME_HTML = htmlLoader(PATH_TO_HOME);
+  SETTINGS_HTML = htmlLoader(PATH_TO_SETTINGS);
 
   server.on("/", handleHome);
   server.on("/settings", handleSettings);

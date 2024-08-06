@@ -1,6 +1,9 @@
 #ifndef WEB_SETTINGS_H
 #define WEB_SETTINGS_H
 
+#define PATH_TO_HOME "/home.html"
+#define PATH_TO_SETTINGS "/settings.html"
+
 #include <Arduino.h>
 #include <FS.h>
 #include <SPIFFS.h>
@@ -23,6 +26,10 @@ extern Adafruit_BME280 bme;
 extern RTC_DS3231 rtc;
 extern DateTime current_time;
 extern uint8_t displaySelector;
+
+extern String HOME_HTML;
+extern String SETTINGS_HTML;
+String htmlLoader(const char* filename);
 
 void handleHome();
 void handleSettings();

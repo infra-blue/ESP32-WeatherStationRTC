@@ -3,7 +3,6 @@
 #include <ArduinoJson.h>
 
 #include "Config_Parser.h"
-#define PATH_TO_CONF "/config.json"
 
 void printConfiguration(Config config) {
     Serial.printf("Standard TimeChangeRule:\n");

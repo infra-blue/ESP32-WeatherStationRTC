@@ -1,11 +1,23 @@
 #include "Web_Settings.h"
 
+String htmlLoader(const char* filename) {
+  String content = "";
+  File file = SPIFFS.open(filename, FILE_READ);
+
+  if (!file) {
+      Serial.printf("Error opening file: %s\n", filename);
+      return content;
+  }
+
+  while (file.available())
+      content += (char)file.read();
+
+  file.close();
+  return content;
+}
+
 void handleHome() {
-  float temperature = bme.readTemperature();
-  float humidity = bme.readHumidity();
-  float pressure = bme.readPressure() / 100.0;
-  String temperatureUnit = conf.fahrenheit ? "Fahrenheit" : "Celsius";
-  String temperatureValue = conf.fahrenheit ? String(temperature * 1.8 + 32) : String(temperature);
+  String html = HOME_HTML;
 
   char year[] = "0000";
   char month[] = "00";
@@ -21,504 +33,100 @@ void handleHome() {
   sprintf(minute, "%02d", current_time.minute());
   sprintf(second, "%02d", current_time.second());
 
-  String html = R"HTML(
-  <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>ESP32 Home</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 20px;
-          background-color: #222;
-          color: #fff;
-        }
-        h1 {
-          text-align: center;
-          font-size: 3em;
-          color: white;
-          margin-bottom: 20px;
-        }
-        form {
-          max-width: 600px;
-          margin-left: auto;
-          margin-right: auto;
-          margin-top: 20px;
-          background-color: rgba(50, 50, 50);
-          padding: 20px;
-          border-radius: 8px;
-        }
-        .button-row {
-          display: flex;
-          justify-content: space-between;
-          max-width: 620px;
-          margin-top: 20px;
-          margin-left: auto;
-          margin-right: auto;
-          padding: 10px;
-          background-color: rgba(50, 50, 50);
-          border-radius: 8px;
-        }
-        .button-row form {
-          flex: 1;
-          max-width: 600px;
-          margin-top: 10px;
-          margin-bottom: 10px;
-          margin-left: 10px;
-          padding: 0px;
-        }
-        .button-row form:last-child {
-          margin-right: 10px;
-        }
-        .button-row input[type="submit"] {
-          width: 100%;
-        }
-        input[type="submit"] {
-          background-color: #007bff;
-          color: white;
-          padding: 10px 20px;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          display: block;
-          margin-left: 0;
-          margin-right: auto;
-          width: 100%;
-        }
-        input[type="submit"]:hover {
-          background-color: #0056b3;
-        }
-        p {
-          font-size: 18px;
-          line-height: 1.6;
-          margin: 10px 0;
-          text-align: center;
-        }
-        .data {
-          font-weight: bold;
-          color: #03dac6;
-        }
-        .section {
-          margin-bottom: 10px;
-          padding: 10px;
-          border-radius: 8px;
-          background-color: #444;
-        }
-        .section h2 {
-          text-align: center;
-          margin-top: 0;
-          font-size: 1.6em;
-          border-bottom: 1px solid #555;
-          padding-bottom: 10px;
-        }
-        @media (max-width: 600px) {
-          h1 {
-            font-size: 1.8em;
-          }
-          .button-row {
-            flex-direction: row;
-            flex-wrap: nowrap;
-            gap: 0px;
-          }
-          .button-row form {
-            margin-right: 0px;
-            flex: 1;
-          }
-          .button-row form:last-child {
-            margin-right: 10px;
-          }
-          p {
-          font-size: 16px;
-          }
-        }
-        @media (max-width: 300px) {
-          .button-row form input[type="submit"]{
-              font-size: 0;
-          }
-        }
-      </style>
-    </head>
-    <body>
-    <h1><strong>ESP32 WeatherStation</strong> Home</h1>
-      <div class="button-row">
-        <form action="/timeTempScreen" method="post">
-          <input type="submit" value="Time">
-        </form>
-        <form action="/dateScreen" method="post">
-          <input type="submit" value="Date">
-        </form>
-        <form action="/humPresScreen" method="post">
-          <input type="submit" value="Air">
-        </form>
-      </div>
-      <div class="button-row">
-        <form action="/toggleScreen" method="post">
-          <input type="submit" value=")HTML" +
-          String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"HTML(">
-        </form>
-        <form action="/reboot" method="post">
-          <input type="submit" value="Reboot">
-        </form>
-      </div>
-      <form action="/settings" method="get">
-        <div class="section">
-          <h2>Sensor Data</h2>
-          <p>Temperature: <span class="data">)HTML" + temperatureValue + " " + temperatureUnit + R"HTML(</span></p>
-          <p>Humidity: <span class="data">)HTML" + String(humidity) + R"HTML( %</span></p>
-          <p>Pressure: <span class="data">)HTML" + String(pressure) + R"HTML( hPa</span></p>
-          <h2>Date and Time</h2>
-          <p>Date: <span class="data">)HTML" + String(day) + "/" + String(month) + "/" + String(year) + R"HTML(</span></p>
-          <p>Time: <span class="data">)HTML" + String(hour) + ":" + String(minute) + ":" + String(second) + R"HTML(</span></p>
-          <input type="submit" value="Settings">
-        </div>
-      </form>
-  </body>
-  </html>
-  )HTML";
+  html.replace("{{ TOGGLE_SCREEN }}", String(screen_off ? "Turn On Screen" : "Turn Off Screen"));
+  html.replace("{{ TEMP }}", conf.fahrenheit ? String(bme.readTemperature() * 1.8 + 32) : String(bme.readTemperature()));
+  html.replace("{{ TEMPUNIT }}", conf.fahrenheit ? "Fahrenheit" : "Celsius");
+  html.replace("{{ HUMIDITY }}", String(bme.readHumidity()));
+  html.replace("{{ PRESSURE }}", String(bme.readPressure() / 100.0));
+  html.replace("{{ DAY }}", day);
+  html.replace("{{ MONTH }}", month);
+  html.replace("{{ YEAR }}", year);
+  html.replace("{{ HOUR }}", hour);
+  html.replace("{{ MINUTE }}", minute);
+  html.replace("{{ SECOND }}", second);
+
   server.send(200, "text/html", html);
 }
 
 void handleSettings() {
-  String html = R"HTML(
-  <!DOCTYPE HTML>
-      <html lang="en">
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>ESP32 Settings</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 20px;
-              background-color: #222;
-              color: #fff;
-            }
-            h1 {
-              text-align: center;
-              font-size: 3em;
-              color: white;
-              margin-bottom: 20px;
-            }
-            form {
-              margin-top: 20px;
-              max-width: 600px;
-              margin-left: auto;
-              margin-right: auto;
-              background-color: rgba(50, 50, 50, 0.8);
-              padding: 20px;
-              border-radius: 8px;
-            }
-            label {
-              display: block;
-              margin-bottom: 10px;
-            }
-            input[type="text"],
-            select,
-            input[type="number"],
-            input[type="password"] {
-              width: 100%;
-              padding: 10px;
-              margin-bottom: 10px;
-              border: 1px solid #ccc;
-              border-radius: 4px;
-              box-sizing: border-box;
-              background-color: #444;
-              color: #fff;
-            }
-            .button-row {
-              display: flex;
-              justify-content: space-between;
-              max-width: 640px;
-              margin-left: auto;
-              margin-right: auto;
-            }
-            .button-row form {
-              flex: 1;
-              margin-right: 10px;
-            }
-            .button-row form:last-child {
-              margin-right: 0;
-            }
-            .button-row input[type="submit"] {
-              width: 100%;
-            }
-            input[type="submit"] {
-              background-color: #007bff;
-              color: white;
-              padding: 10px 20px;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-              display: block;
-              margin-left: 0;
-              margin-right: auto;
-              width: 100%;
-            }
-            input[type="submit"]:hover {
-              background-color: #0056b3;
-            }
-            .section {
-              margin-bottom: 10px;
-              padding: 10px;
-              border-radius: 8px;
-              background-color: #444;
-            }
-            .section h2 {
-              margin-top: 0;
-              font-size: 1.2em;
-              border-bottom: 1px solid #555;
-              padding-bottom: 10px;
-            }
-            .checkbox-container {
-              display: flex;
-              align-items: center;
-              margin: 10px 0;
-            }
-            .checkbox-container label {
-              margin-left: 10px;
-              margin-bottom: 0;
-            }
-            .checkbox-container label:first-child {
-              margin-right: 0;
-            }
-            @media (max-width: 600px) {
-              h1 {
-                font-size: 1.8em;
-              }
-              .button-row {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                gap: 10px;
-              }
-              .button-row form {
-                margin-right: 0;
-                flex: 1;
-              }
-              .button-row form:last-child {
-                margin-bottom: 0;
-              }
-            }
-          </style>
-        </head>
-        <body>
-      <h1><strong>ESP32 WeatherStation</strong> Settings</h1>
-      <form action="/" method="get">
-        <input type="submit" value="Home">
-      </form>
-      <!-- Network Settings Form -->
-      <form action="/submitNetwork" method="post">
-        <div class="section">
-          <h2>Network Settings</h2>
-          <label for="ssid">SSID:</label>
-          <input type="text" id="ssid" name="ssid" value=")HTML" +
-            String(conf.wifi.SSID) + R"HTML("><br>
-          <label for="password">Password:</label>
-          <input type="password" id="password" name="password" value=""><br>
-          <input type="submit" value="Save Network Settings">
-        </div>
-      </form>
-      <!-- NTP Server Form -->
-      <form action="/submitNTP" method="post">
-        <div class="section">
-          <h2>NTP Server Settings</h2>
-          <label for="ntpServer">NTP Server:</label>
-          <input type="text" id="ntpServer" name="ntpServer" value=")HTML" +
-            String(conf.ntpServer) + R"HTML("><br>
-          <input type="submit" value="Save NTP Server">
-        </div>
-      </form>
-      <form action="/updateTime" method="post">
-        <div class="section">
-          <h2>Connect to WiFi to update the time</h2>
-          <input type="submit" value="Update Time">
-        </div>
-      </form>
-      <!-- Language Form -->
-      <form action="/submitLanguage" method="post">
-        <div class="section">
-          <h2>Language Settings</h2>
-          <label for="language">Language:</label>
-          <select id="language" name="language">
-            <option value="en")HTML" +
-            String(!strcmp(conf.language, "en") ? " selected" : "") + R"HTML(>English</option>
-            <option value="it")HTML" +
-            String(!strcmp(conf.language, "it") ? " selected" : "") + R"HTML(>Italian</option>
-            <option value="es")HTML" +
-            String(!strcmp(conf.language, "es") ? " selected" : "") + R"HTML(>Spanish</option>
-            <option value="de")HTML" +
-            String(!strcmp(conf.language, "de") ? " selected" : "") + R"HTML(>German</option>
-            <option value="fr")HTML" +
-            String(!strcmp(conf.language, "fr") ? " selected" : "") + R"HTML(>French</option>
-          </select><br>
-          <input type="submit" value="Save Language Settings">
-        </div>
-      </form>
-      <!-- Timezone Settings Form -->
-      <form action="/submitTimezone" method="post">
-        <div class="section">
-          <h2>Timezone Settings</h2>
-          <h3>Standard Time</h3>
-          <label for="stdAbbrev">Abbreviation:</label>
-          <input type="text" id="stdAbbrev" name="stdAbbrev" value=")HTML" +
-            String(conf.std.abbrev) + R"HTML("><br>
-          <label for="stdWeek">Week:</label>
-          <select id="stdWeek" name="stdWeek">
-            <option value="1")HTML" +
-            String(conf.std.week == 1 ? " selected" : "") + R"HTML(>First</option>
-            <option value="2")HTML" +
-            String(conf.std.week == 2 ? " selected" : "") + R"HTML(>Second</option>
-            <option value="3")HTML" +
-            String(conf.std.week == 3 ? " selected" : "") + R"HTML(>Third</option>
-            <option value="4")HTML" +
-            String(conf.std.week == 4 ? " selected" : "") + R"HTML(>Fourth</option>
-            <option value="0")HTML" +
-            String(conf.std.week == 0 ? " selected" : "") + R"HTML(>Last</option>
-          </select><br>
-          <label for="stdDOW">Day of Week:</label>
-          <select id="stdDOW" name="stdDOW">
-            <option value="1")HTML" +
-            String(conf.std.dow == 1 ? " selected" : "") + R"HTML(>Sunday</option>
-            <option value="2")HTML" +
-            String(conf.std.dow == 2 ? " selected" : "") + R"HTML(>Monday</option>
-            <option value="3")HTML" +
-            String(conf.std.dow == 3 ? " selected" : "") + R"HTML(>Tuesday</option>
-            <option value="4")HTML" +
-            String(conf.std.dow == 4 ? " selected" : "") + R"HTML(>Wednesday</option>
-            <option value="5")HTML" +
-            String(conf.std.dow == 5 ? " selected" : "") + R"HTML(>Thursday</option>
-            <option value="6")HTML" +
-            String(conf.std.dow == 6 ? " selected" : "") + R"HTML(>Friday</option>
-            <option value="7")HTML" +
-            String(conf.std.dow == 7 ? " selected" : "") + R"HTML(>Saturday</option>
-          </select><br>
-          <label for="stdMonth">Month:</label>
-          <select id="stdMonth" name="stdMonth">
-            <option value="1")HTML" +
-            String(conf.std.month == 1 ? " selected" : "") + R"HTML(>January</option>
-            <option value="2")HTML" +
-            String(conf.std.month == 2 ? " selected" : "") + R"HTML(>February</option>
-            <option value="3")HTML" +
-            String(conf.std.month == 3 ? " selected" : "") + R"HTML(>March</option>
-            <option value="4")HTML" +
-            String(conf.std.month == 4 ? " selected" : "") + R"HTML(>April</option>
-            <option value="5")HTML" +
-            String(conf.std.month == 5 ? " selected" : "") + R"HTML(>May</option>
-            <option value="6")HTML" +
-            String(conf.std.month == 6 ? " selected" : "") + R"HTML(>June</option>
-            <option value="7")HTML" +
-            String(conf.std.month == 7 ? " selected" : "") + R"HTML(>July</option>
-            <option value="8")HTML" +
-            String(conf.std.month == 8 ? " selected" : "") + R"HTML(>August</option>
-            <option value="9")HTML" +
-            String(conf.std.month == 9 ? " selected" : "") + R"HTML(>September</option>
-            <option value="10")HTML" +
-            String(conf.std.month == 10 ? " selected" : "") + R"HTML(>October</option>
-            <option value="11")HTML" +
-            String(conf.std.month == 11 ? " selected" : "") + R"HTML(>November</option>
-            <option value="12")HTML" +
-            String(conf.std.month == 12 ? " selected" : "") + R"HTML(>December</option>
-          </select><br>
-          <label for="stdHour">Hour:</label>
-          <input type="number" id="stdHour" name="stdHour" min="0" max="23" value=")HTML" +
-            String(conf.std.hour) + R"HTML("><br>
-          <label for="stdOffset">Offset:</label>
-          <input type="number" id="stdOffset" name="stdOffset" value=")HTML" +
-            String(conf.std.offset) + R"HTML("><br>
-          <h3>Daylight Saving Time</h3>
-          <label for="dltAbbrev">Abbreviation:</label>
-          <input type="text" id="dltAbbrev" name="dltAbbrev" value=")HTML" +
-            String(conf.dlt.abbrev) + R"HTML("><br>
-          <label for="dltWeek">Week:</label>
-          <select id="dltWeek" name="dltWeek">
-            <option value="1")HTML" +
-            String(conf.dlt.week == 1 ? " selected" : "") + R"HTML(>First</option>
-            <option value="2")HTML" +
-            String(conf.dlt.week == 2 ? " selected" : "") + R"HTML(>Second</option>
-            <option value="3")HTML" +
-            String(conf.dlt.week == 3 ? " selected" : "") + R"HTML(>Third</option>
-            <option value="4")HTML" +
-            String(conf.dlt.week == 4 ? " selected" : "") + R"HTML(>Fourth</option>
-            <option value="0")HTML" +
-            String(conf.dlt.week == 0 ? " selected" : "") + R"HTML(>Last</option>
-          </select><br>
-          <label for="dltDOW">Day of Week:</label>
-          <select id="dltDOW" name="dltDOW">
-            <option value="1")HTML" +
-            String(conf.dlt.dow == 1 ? " selected" : "") + R"HTML(>Sunday</option>
-            <option value="2")HTML" +
-            String(conf.dlt.dow == 2 ? " selected" : "") + R"HTML(>Monday</option>
-            <option value="3")HTML" +
-            String(conf.dlt.dow == 3 ? " selected" : "") + R"HTML(>Tuesday</option>
-            <option value="4")HTML" +
-            String(conf.dlt.dow == 4 ? " selected" : "") + R"HTML(>Wednesday</option>
-            <option value="5")HTML" +
-            String(conf.dlt.dow == 5 ? " selected" : "") + R"HTML(>Thursday</option>
-            <option value="6")HTML" +
-            String(conf.dlt.dow == 6 ? " selected" : "") + R"HTML(>Friday</option>
-            <option value="7")HTML" +
-            String(conf.dlt.dow == 7 ? " selected" : "") + R"HTML(>Saturday</option>
-          </select><br>
-          <label for="dltMonth">Month:</label>
-          <select id="dltMonth" name="dltMonth">
-            <option value="1")HTML" +
-            String(conf.dlt.month == 1 ? " selected" : "") + R"HTML(>January</option>
-            <option value="2")HTML" +
-            String(conf.dlt.month == 2 ? " selected" : "") + R"HTML(>February</option>
-            <option value="3")HTML" +
-            String(conf.dlt.month == 3 ? " selected" : "") + R"HTML(>March</option>
-            <option value="4")HTML" +
-            String(conf.dlt.month == 4 ? " selected" : "") + R"HTML(>April</option>
-            <option value="5")HTML" +
-            String(conf.dlt.month == 5 ? " selected" : "") + R"HTML(>May</option>
-            <option value="6")HTML" +
-            String(conf.dlt.month == 6 ? " selected" : "") + R"HTML(>June</option>
-            <option value="7")HTML" +
-            String(conf.dlt.month == 7 ? " selected" : "") + R"HTML(>July</option>
-            <option value="8")HTML" +
-            String(conf.dlt.month == 8 ? " selected" : "") + R"HTML(>August</option>
-            <option value="9")HTML" +
-            String(conf.dlt.month == 9 ? " selected" : "") + R"HTML(>September</option>
-            <option value="10")HTML" +
-            String(conf.dlt.month == 10 ? " selected" : "") + R"HTML(>October</option>
-            <option value="11")HTML" +
-            String(conf.dlt.month == 11 ? " selected" : "") + R"HTML(>November</option>
-            <option value="12")HTML" +
-            String(conf.dlt.month == 12 ? " selected" : "") + R"HTML(>December</option>
-          </select><br>
-          <label for="dltHour">Hour:</label>
-          <input type="number" id="dltHour" name="dltHour" min="0" max="23" value=")HTML" +
-            String(conf.dlt.hour) + R"HTML("><br>
-          <label for="dltOffset">Offset:</label>
-          <input type="number" id="dltOffset" name="dltOffset" value=")HTML" +
-            String(conf.dlt.offset) + R"HTML("><br>
-          <input type="submit" value="Save Timezone Settings">
-        </div>
-      </form>
-      <!-- Additional Settings Form -->
-      <form action="/submitAdditional" method="post">
-        <div class="container">
-          <div class="section">
-            <h2>Additional Settings</h2>
-            <div class="checkbox-container">
-              <input type="checkbox" id="buzzSound" name="buzzSound")HTML" + String(conf.buzzSound ? " checked " : "") + R"HTML()>
-              <label for="buzzSound">Buzzer Sound</label>
-            </div>
-            <div class="checkbox-container">
-              <input type="checkbox" id="fahrenheit" name="fahrenheit")HTML" + String(conf.fahrenheit ? " checked " : "") + R"HTML()>
-              <label for="fahrenheit">Temperature in Fahrenheit</label>
-            </div>
-            <input type="submit" value="Save Additional Settings" class="button">
-          </div>
-        </div>
-      </form>
-    </body>
-    </html>
-  )HTML";
+  String html = SETTINGS_HTML;
+
+  html.replace("{{ SSID }}", String(conf.wifi.SSID));
+  html.replace("{{ NTP_SERVER }}", String(conf.ntpServer));
+
+  html.replace("{{ ENGLISH }}", String(!strcmp(conf.language, "en") ? " selected" : ""));
+  html.replace("{{ ITALIAN }}", String(!strcmp(conf.language, "it") ? " selected" : ""));
+  html.replace("{{ SPANISH }}", String(!strcmp(conf.language, "es") ? " selected" : ""));
+  html.replace("{{ GERMAN }}", String(!strcmp(conf.language, "de") ? " selected" : ""));
+  html.replace("{{ FRENCH }}", String(!strcmp(conf.language, "fr") ? " selected" : ""));
+
+  html.replace("{{ STD_ABBREV }}", String(conf.std.abbrev));
+
+  html.replace("{{ STD_WEEK_0 }}", String(conf.std.week == 0 ? " selected" : ""));
+  html.replace("{{ STD_WEEK_1 }}", String(conf.std.week == 1 ? " selected" : ""));
+  html.replace("{{ STD_WEEK_2 }}", String(conf.std.week == 2 ? " selected" : ""));
+  html.replace("{{ STD_WEEK_3 }}", String(conf.std.week == 3 ? " selected" : ""));
+  html.replace("{{ STD_WEEK_4 }}", String(conf.std.week == 4 ? " selected" : ""));
+
+  html.replace("{{ STD_DOW_1 }}", String(conf.std.dow == 1 ? " selected" : ""));
+  html.replace("{{ STD_DOW_2 }}", String(conf.std.dow == 2 ? " selected" : ""));
+  html.replace("{{ STD_DOW_3 }}", String(conf.std.dow == 3 ? " selected" : ""));
+  html.replace("{{ STD_DOW_4 }}", String(conf.std.dow == 4 ? " selected" : ""));
+  html.replace("{{ STD_DOW_5 }}", String(conf.std.dow == 5 ? " selected" : ""));
+  html.replace("{{ STD_DOW_6 }}", String(conf.std.dow == 6 ? " selected" : ""));
+  html.replace("{{ STD_DOW_7 }}", String(conf.std.dow == 7 ? " selected" : ""));
+
+  html.replace("{{ STD_MONTH_1 }}", String(conf.std.month == 1 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_2 }}", String(conf.std.month == 2 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_3 }}", String(conf.std.month == 3 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_4 }}", String(conf.std.month == 4 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_5 }}", String(conf.std.month == 5 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_6 }}", String(conf.std.month == 6 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_7 }}", String(conf.std.month == 7 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_8 }}", String(conf.std.month == 8 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_9 }}", String(conf.std.month == 9 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_10 }}", String(conf.std.month == 10 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_11 }}", String(conf.std.month == 11 ? " selected" : ""));
+  html.replace("{{ STD_MONTH_12 }}", String(conf.std.month == 12 ? " selected" : ""));
+
+  html.replace("{{ STD_HOUR }}", String(conf.std.hour));
+  html.replace("{{ STD_OFFSET }}", String(conf.std.offset));
+
+  html.replace("{{ DLT_ABBREV }}", String(conf.dlt.abbrev));
+
+  html.replace("{{ DLT_WEEK_0 }}", String(conf.dlt.week == 0 ? " selected" : ""));
+  html.replace("{{ DLT_WEEK_1 }}", String(conf.dlt.week == 1 ? " selected" : ""));
+  html.replace("{{ DLT_WEEK_2 }}", String(conf.dlt.week == 2 ? " selected" : ""));
+  html.replace("{{ DLT_WEEK_3 }}", String(conf.dlt.week == 3 ? " selected" : ""));
+  html.replace("{{ DLT_WEEK_4 }}", String(conf.dlt.week == 4 ? " selected" : ""));
+
+  html.replace("{{ DLT_DOW_1 }}", String(conf.dlt.dow == 1 ? " selected" : ""));
+  html.replace("{{ DLT_DOW_2 }}", String(conf.dlt.dow == 2 ? " selected" : ""));
+  html.replace("{{ DLT_DOW_3 }}", String(conf.dlt.dow == 3 ? " selected" : ""));
+  html.replace("{{ DLT_DOW_4 }}", String(conf.dlt.dow == 4 ? " selected" : ""));
+  html.replace("{{ DLT_DOW_5 }}", String(conf.dlt.dow == 5 ? " selected" : ""));
+  html.replace("{{ DLT_DOW_6 }}", String(conf.dlt.dow == 6 ? " selected" : ""));
+  html.replace("{{ DLT_DOW_7 }}", String(conf.dlt.dow == 7 ? " selected" : ""));
+
+  html.replace("{{ DLT_MONTH_1 }}", String(conf.dlt.month == 1 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_2 }}", String(conf.dlt.month == 2 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_3 }}", String(conf.dlt.month == 3 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_4 }}", String(conf.dlt.month == 4 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_5 }}", String(conf.dlt.month == 5 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_6 }}", String(conf.dlt.month == 6 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_7 }}", String(conf.dlt.month == 7 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_8 }}", String(conf.dlt.month == 8 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_9 }}", String(conf.dlt.month == 9 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_10 }}", String(conf.dlt.month == 10 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_11 }}", String(conf.dlt.month == 11 ? " selected" : ""));
+  html.replace("{{ DLT_MONTH_12 }}", String(conf.dlt.month == 12 ? " selected" : ""));
+
+  html.replace("{{ DLT_HOUR }}", String(conf.dlt.hour));
+  html.replace("{{ DLT_OFFSET }}", String(conf.dlt.offset));
+
+  html.replace("{{ BUZZ_SOUND }}", String(conf.buzzSound ? "checked " : ""));
+  html.replace("{{ FAHRENHEIT }}", String(conf.fahrenheit ? "checked " : ""));
+
   server.send(200, "text/html", html);
 }
 
