@@ -47,8 +47,11 @@ Timezone* TMZ = nullptr;
 
 bool tic = true;
 int sound_interval = 0;
+
 bool screen_off = false;
 uint8_t displaySelector = 0;
+
+int measurement_interval = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -72,6 +75,7 @@ void setup() {
   server.on("/settings", handleSettings);
   server.on("/updateTime", HTTP_POST, handleUpdateTime);
   server.on("/toggleScreen", HTTP_POST, handleToggleScreen);
+  server.on("/reboot", HTTP_POST, handleReboot);
   server.on("/timeTempScreen", HTTP_POST, handleTimeTempScreen);
   server.on("/dateScreen", HTTP_POST, handleDateScreen);
   server.on("/humPresScreen", HTTP_POST, handleHumPresScreen);
@@ -170,12 +174,12 @@ void setup() {
 
   matrix->displayClear();
 
-  bme.setSampling(Adafruit_BME280::MODE_NORMAL,
+  bme.setSampling(Adafruit_BME280::MODE_FORCED,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::SAMPLING_X16,
                   Adafruit_BME280::FILTER_X4,
-                  Adafruit_BME280::STANDBY_MS_500
+                  Adafruit_BME280::STANDBY_MS_1000
                   );
 
   printConfiguration(conf);
@@ -188,6 +192,10 @@ void loop() {
   screen_button.update();
   if (screen_button.released())
     ++displaySelector %= 3;
+
+  if((millis() - measurement_interval) > 30000)
+    if(bme.takeForcedMeasurement())
+      measurement_interval = millis();
 
   switch(displaySelector) {
     case CLOCK_TEMP:

@@ -17,6 +17,7 @@ void print_time_temp() {
 
   sprintf(hh_mm, "%02d%c%02d", current_time.hour(), ((current_time.second() % 2) ? ':' : ' '), current_time.minute());
   sprintf(ss, "%02d", current_time.second());
+
   if(!conf.fahrenheit)
     sprintf(temp, "%3.1f °C", bme.readTemperature());
   else

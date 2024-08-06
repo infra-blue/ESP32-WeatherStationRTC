@@ -43,27 +43,35 @@ void handleHome() {
           margin-bottom: 20px;
         }
         form {
-          margin-top: 20px;
           max-width: 600px;
           margin-left: auto;
           margin-right: auto;
-          background-color: rgba(50, 50, 50, 0.8);
+          margin-top: 20px;
+          background-color: rgba(50, 50, 50);
           padding: 20px;
           border-radius: 8px;
         }
         .button-row {
           display: flex;
           justify-content: space-between;
-          max-width: 640px;
+          max-width: 620px;
+          margin-top: 20px;
           margin-left: auto;
           margin-right: auto;
+          padding: 10px;
+          background-color: rgba(50, 50, 50);
+          border-radius: 8px;
         }
         .button-row form {
           flex: 1;
-          margin-right: 10px;
+          max-width: 600px;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          margin-left: 10px;
+          padding: 0px;
         }
         .button-row form:last-child {
-          margin-right: 0;
+          margin-right: 10px;
         }
         .button-row input[type="submit"] {
           width: 100%;
@@ -113,17 +121,22 @@ void handleHome() {
           .button-row {
             flex-direction: row;
             flex-wrap: nowrap;
-            gap: 10px;
+            gap: 0px;
           }
           .button-row form {
-            margin-right: 0;
+            margin-right: 0px;
             flex: 1;
           }
           .button-row form:last-child {
-            margin-bottom: 0;
+            margin-right: 10px;
           }
           p {
           font-size: 16px;
+          }
+        }
+        @media (max-width: 300px) {
+          .button-row form input[type="submit"]{
+              font-size: 0;
           }
         }
       </style>
@@ -138,13 +151,18 @@ void handleHome() {
           <input type="submit" value="Date">
         </form>
         <form action="/humPresScreen" method="post">
-          <input type="submit" value="Env">
+          <input type="submit" value="Air">
         </form>
       </div>
-      <form action="/toggleScreen" method="post">
-        <input type="submit" value=")HTML" +
-        String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"HTML(">
-      </form>
+      <div class="button-row">
+        <form action="/toggleScreen" method="post">
+          <input type="submit" value=")HTML" +
+          String(screen_off ? "Turn On Screen" : "Turn Off Screen") + R"HTML(">
+        </form>
+        <form action="/reboot" method="post">
+          <input type="submit" value="Reboot">
+        </form>
+      </div>
       <form action="/settings" method="get">
         <div class="section">
           <h2>Sensor Data</h2>
@@ -532,6 +550,12 @@ void handleToggleScreen() {
 
   server.sendHeader("Location", "/", true);
   server.send(302, "text/plain", "Redirecting to /");
+}
+
+void handleReboot() {
+  server.sendHeader("Location", "/", true);
+  delay(1000);
+  ESP.restart();
 }
 
 void handleNetworkSubmit() {

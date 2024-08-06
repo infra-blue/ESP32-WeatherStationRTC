@@ -31,10 +31,11 @@ void handleNTPSubmit();
 void handleLanguageSubmit();
 void handleTimezoneSubmit();
 void handleAdditionalSubmit();
-void handleToggleScreen();
 void handleTimeTempScreen();
 void handleDateScreen();
 void handleHumPresScreen();
+void handleToggleScreen();
+void handleReboot();
 void handleUpdateTime();
 
 #endif
