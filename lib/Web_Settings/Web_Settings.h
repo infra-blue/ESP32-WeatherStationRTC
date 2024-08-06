@@ -13,6 +13,7 @@
 
 #include <Config_Parser.h>
 #include <Set_NTP_Time.h>
+#include <Screens.h>
 
 extern bool screen_off;
 extern Config conf;

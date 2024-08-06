@@ -505,19 +505,19 @@ void handleSettings() {
 }
 
 void handleTimeTempScreen() {
-  displaySelector = 0;
+  displaySelector = CLOCK_TEMP;
   server.sendHeader("Location", "/", true);
   server.send(302, "text/plain", "Redirecting to /");
 }
 
 void handleDateScreen() {
-  displaySelector = 1;
+  displaySelector = DATE;
   server.sendHeader("Location", "/", true);
   server.send(302, "text/plain", "Redirecting to /");
 }
 
 void handleHumPresScreen() {
-  displaySelector = 2;
+  displaySelector = HUMIDITY_PRESSURE;
   server.sendHeader("Location", "/", true);
   server.send(302, "text/plain", "Redirecting to /");
 }
