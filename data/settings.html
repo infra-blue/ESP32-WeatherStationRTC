@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>ESP32 Settings</title>
         <style>
-            body {
+          body {
               font-family: Arial, sans-serif;
               margin: 0;
               padding: 20px;
@@ -19,13 +19,49 @@
               margin-bottom: 20px;
             }
             form {
-              margin-top: 20px;
               max-width: 600px;
               margin-left: auto;
               margin-right: auto;
-              background-color: rgba(50, 50, 50, 0.8);
+              margin-top: 20px;
+              background-color: rgba(50, 50, 50);
               padding: 20px;
               border-radius: 8px;
+            }
+            input[type="submit"] {
+              background-color: #007bff;
+              color: white;
+              padding: 10px 20px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              display: block;
+              width: 100%;
+            }
+            input[type="submit"]:hover {
+              background-color: #0056b3;
+            }
+            p {
+              font-size: 18px;
+              line-height: 1.6;
+              margin: 5px;
+              margin-left: 18%;
+              text-align: left;
+            }
+            .data {
+              font-weight: bold;
+              color: #03dac6;
+            }
+            .section {
+              padding: 10px;
+              border-radius: 8px;
+              background-color: #444;
+            }
+            .section h2 {
+              text-align: center;
+              margin-top: 0;
+              font-size: 1.6em;
+              border-bottom: 1px solid #555;
+              padding-bottom: 10px;
             }
             label {
               display: block;
@@ -44,50 +80,6 @@
               background-color: #444;
               color: #fff;
             }
-            .button-row {
-              display: flex;
-              justify-content: space-between;
-              max-width: 640px;
-              margin-left: auto;
-              margin-right: auto;
-            }
-            .button-row form {
-              flex: 1;
-              margin-right: 10px;
-            }
-            .button-row form:last-child {
-              margin-right: 0;
-            }
-            .button-row input[type="submit"] {
-              width: 100%;
-            }
-            input[type="submit"] {
-              background-color: #007bff;
-              color: white;
-              padding: 10px 20px;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-              display: block;
-              margin-left: 0;
-              margin-right: auto;
-              width: 100%;
-            }
-            input[type="submit"]:hover {
-              background-color: #0056b3;
-            }
-            .section {
-              margin-bottom: 10px;
-              padding: 10px;
-              border-radius: 8px;
-              background-color: #444;
-            }
-            .section h2 {
-              margin-top: 0;
-              font-size: 1.2em;
-              border-bottom: 1px solid #555;
-              padding-bottom: 10px;
-            }
             .checkbox-container {
               display: flex;
               align-items: center;
@@ -104,17 +96,8 @@
               h1 {
                 font-size: 1.8em;
               }
-              .button-row {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                gap: 10px;
-              }
-              .button-row form {
-                margin-right: 0;
-                flex: 1;
-              }
-              .button-row form:last-child {
-                margin-bottom: 0;
+              p {
+              font-size: 16px;
               }
             }
           </style>

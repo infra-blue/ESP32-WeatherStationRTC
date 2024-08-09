@@ -60,8 +60,6 @@
               border-radius: 4px;
               cursor: pointer;
               display: block;
-              margin-left: 0;
-              margin-right: auto;
               width: 100%;
             }
             input[type="submit"]:hover {
@@ -70,16 +68,17 @@
             p {
               font-size: 18px;
               line-height: 1.6;
-              margin: 10px 0;
-              text-align: center;
+              margin: 5px;
+              margin-left: 18%;
+              text-align: left;
             }
             .data {
               font-weight: bold;
               color: #03dac6;
             }
             .section {
-              margin-bottom: 10px;
               padding: 10px;
+              margin-bottom: 10px;
               border-radius: 8px;
               background-color: #444;
             }
@@ -94,18 +93,6 @@
               h1 {
                 font-size: 1.8em;
               }
-              .button-row {
-                flex-direction: row;
-                flex-wrap: nowrap;
-                gap: 0px;
-              }
-              .button-row form {
-                margin-right: 0px;
-                flex: 1;
-              }
-              .button-row form:last-child {
-                margin-right: 10px;
-              }
               p {
               font-size: 16px;
               }
@@ -118,18 +105,19 @@
           </style>
     </head>
     <body>
-        <h1><strong>ESP32 WeatherStation</strong> Home</h1>
-        <div class="button-row">
-            <form action="/timeTempScreen" method="post">
-                <input type="submit" value="Time">
-            </form>
-            <form action="/dateScreen" method="post">
-                <input type="submit" value="Date">
-            </form>
-            <form action="/humPresScreen" method="post">
-                <input type="submit" value="Air">
-            </form>
-        </div>
+
+      <h1><strong>ESP32 WeatherStation</strong> Home</h1>
+      <div class="button-row">
+          <form action="/timeTempScreen" method="post">
+              <input type="submit" value="Time">
+          </form>
+          <form action="/dateScreen" method="post">
+              <input type="submit" value="Date">
+          </form>
+          <form action="/humPresScreen" method="post">
+              <input type="submit" value="Air">
+          </form>
+      </div>
         <div class="button-row">
             <form action="/toggleScreen" method="post">
                 <input type="submit" value="{{ TOGGLE_SCREEN }}">
@@ -138,17 +126,19 @@
                 <input type="submit" value="Reboot">
             </form>
         </div>
-        <form action="/settings" method="get">
+          <form action="/settings" method="get">
             <div class="section">
                 <h2>Sensor Data</h2>
                 <p>Temperature: <span class="data">{{ TEMP }} {{ TEMPUNIT }}</span></p>
                 <p>Humidity: <span class="data">{{ HUMIDITY }} %</span></p>
                 <p>Pressure: <span class="data">{{ PRESSURE }} hPa</span></p>
+            </div>
+            <div class="section">
                 <h2>Date and Time</h2>
                 <p>Date: <span class="data">{{ DAY }}/{{ MONTH }}/{{ YEAR }}</span></p>
                 <p>Time: <span class="data">{{ HOUR }}:{{ MINUTE }}:{{ SECOND }}</span></p>
-                <input type="submit" value="Settings">
             </div>
-        </form>
+            <input type="submit" value="Settings">
+          </form>
     </body>
 </html>
